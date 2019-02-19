@@ -1,0 +1,55 @@
+mport java.util.Scanner;
+
+public class Szamolo {
+
+    public static void main(String[] args) {
+
+
+        String[] options = { "összeadás", "kivonás","szorzás", "osztás"  };
+
+        for (int i = 0; i < options.length; ++i) {
+            System.out.println( (i+1) + ".) " + options[i]);
+        }
+        
+        System.out.print("Melyik műveletet hajtsam végre? ");
+        Scanner sc = new Scanner(System.in);
+        int choice = sc.nextInt();
+        
+        if (  !(choice>=1 && choice<=4) ){
+            System.out.println("Hibás művelet."); return;
+        }
+
+        System.out.print("Kérem az egyik számot: ");
+        int a = sc.nextInt();
+        System.out.print("Kérem a másik számot: ");
+        int b = sc.nextInt();
+        
+        double result = 0;
+        
+        switch ( choice ){
+            
+            case 1:
+                 result = a+b;
+                 break;
+            case 2:
+                result = a-b;
+                break;
+            case 3:
+                result = a * b;
+                break;
+            case 4:
+    
+                if ( b == 0 ){
+                    System.out.println("Nullával való osztás."); return;
+                }
+                result = (double)a / b;
+                break;
+        }
+        
+        if ( (int)result == result ){
+            System.out.println("Az eredmény: " + (int)result );
+        }
+        else  System.out.println("Az eredmény: " + result );
+    }
+
+}
