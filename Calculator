@@ -16,7 +16,7 @@ public class Szamolo {
         int choice = sc.nextInt();
         
         if (  !(choice>=1 && choice<=4) ){
-            System.out.println("Hibás művelet."); return;
+            System.out.println("Hibás művelet."); System.exit(0);
         }
 
         System.out.print("Kérem az egyik számot: ");
@@ -40,7 +40,7 @@ public class Szamolo {
             case 4:
     
                 if ( b == 0 ){
-                    System.out.println("Nullával való osztás."); return;
+                    System.out.println("Nullával való osztás."); System.exit(0);
                 }
                 result = (double)a / b;
                 break;
