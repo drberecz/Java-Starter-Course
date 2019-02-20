@@ -1,0 +1,31 @@
+import java.util.Scanner;
+
+public class Suti1 {
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        String[] phrase = {"deka liszt", "tojás", "deka cukor"};
+        final double[] INGREDIENT_UNITS = new double[phrase.length];
+        double[] amountAvail = new double[phrase.length];
+
+        for (int i = 0; i < phrase.length; ++i) {
+            System.out.print("Hány " + phrase[i] + " kell a sütihez?");
+            INGREDIENT_UNITS[i] = sc.nextInt();
+        }
+
+        double minProportion = Double.MAX_VALUE;
+
+        for (int i = 0; i < phrase.length; ++i) {
+            System.out.print("Hány " + phrase[i] + " van otthon?");
+            amountAvail[i] = sc.nextInt();
+            
+            double temp = amountAvail[i] / INGREDIENT_UNITS[i] ;
+            if ( temp<minProportion ) minProportion = temp;
+        }
+
+        System.out.println("A megadott mennyiségekből " + minProportion + " adag készülhet el.");
+    }
+
+}
