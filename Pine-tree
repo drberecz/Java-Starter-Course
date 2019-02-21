@@ -1,0 +1,60 @@
+import java.util.Scanner;
+
+public class Fenyofa {
+
+    public static final int TREE_BASE_HEIGHT = 3;
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("Fenyőfarajzoló program.");
+        System.out.print("Kérem a magasságot: ");
+        int n = sc.nextInt();
+        if (!(n > 2)) {
+            System.out.println("A magasság csak 2-nél nagyobb lehet.");
+            System.exit(0);
+        }
+
+        System.out.print("Kérem a szintek számát: ");
+        int level = sc.nextInt();
+        if (!(level > 0)) {
+            System.out.println("A szintek száma csak pozitív lehet.");
+            System.exit(0);
+        }
+
+        for (int i = 0; i < level; ++i) {
+            drawShape(n, false);
+        }
+        drawShape(n, true);
+    }
+
+    public static void drawShape(int n, boolean notPyramid) {
+
+        int xDim = n * 2 - 1;
+        int left = xDim >> 1;
+        int right = xDim >> 1;
+
+        if (notPyramid) {
+            --left;
+            ++right;
+            n = TREE_BASE_HEIGHT;
+        }
+
+        for (int y = 0; y < n; ++y) {
+            for (int x = 0; x <= right; ++x) {
+                if (x < left) {
+                    System.out.print(" ");
+                } else {
+                    System.out.print("*");
+                }
+            }
+            if (!notPyramid) {
+                --left;
+                ++right;
+            }
+            System.out.print("\n");
+        }
+    }
+
+}
