@@ -1,5 +1,6 @@
 import java.util.Scanner;
 
+
 public class Fenyofa {
 
     public static final int TREE_BASE_HEIGHT = 3;
@@ -41,20 +42,22 @@ public class Fenyofa {
             n = TREE_BASE_HEIGHT;
         }
 
+        StringBuilder sbStr = new StringBuilder(n * n);
         for (int y = 0; y < n; ++y) {
             for (int x = 0; x <= right; ++x) {
                 if (x < left) {
-                    System.out.print(" ");
+                    sbStr.append(' ');
                 } else {
-                    System.out.print("*");
+                    sbStr.append('*');
                 }
             }
             if (!notPyramid) {
                 --left;
                 ++right;
             }
-            System.out.print("\n");
+            sbStr.append("\n");
         }
+        System.out.print( sbStr.toString() );
     }
 
 }
