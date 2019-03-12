@@ -20,8 +20,8 @@ public class GameOfLife {
     {-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 - 1},
     {-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 - 1},
     {-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 - 1},
-    {-1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0 - 1},
-    {-1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0 - 1},
+    {-1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0 - 1},
+    {-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 - 1},
     {-1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0 - 1},
     {-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 - 1},
     {-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 - 1},
@@ -53,14 +53,14 @@ public class GameOfLife {
 Végigpásztázza a mátrixot (Y X) . . . 
     Fontos: a 0. és utolsó indexet nem vizsgálom, az a keret
     */
-    static void scanMatrix(int[][] matrix, boolean[][] mask) {
+    static void scanMatrix(int[][] matrix, boolean[][] mask, boolean apply) {
         
-        isEmpty = true;
+        //isEmpty = (!apply);
         for (int y = 1; y < matrix.length - 1; y++) {
             for (int x = 1; x < matrix[1].length - 1; x++) {
-            
-                validateMatrix(y, x);
-                applyAndShow  (y, x);
+                
+                if ( apply)validateMatrix(y, x);
+                else      applyAndShow  (y, x);
             }
         }
     }
@@ -96,9 +96,9 @@ static void validateMatrix (int y, int x){          int adjacent = 0;
         int count =0;
         do{
         System.out.println("PHASE: " + (++count));
-            scanMatrix(matrix, mask);
-        sc.nextLine();
+            scanMatrix(matrix, mask, true);
+            scanMatrix(matrix, mask, false);
+            sc.nextLine();
         }while (!isEmpty);
     }
 }
-
