@@ -1,0 +1,145 @@
+import java.util.Scanner;
+
+public class GameOfLife {
+
+    static Scanner sc = new Scanner(System.in);
+
+    static final int MATRIX_DIM = 20;
+    static boolean hasChanged;
+
+    
+// a 8 szomszed teszteléséhez 8 relatív koordináta
+    static int[][] vectors = {{-1, -1}, {-1, 0}, {-1, 1},
+                              {0, -1}, {0, 1},
+                              {1, -1}, {1, 0}, {1, 1}
+    };
+
+        
+// ÁLLAPOTOK:   0 nincs,   1 van
+    static int[][] matrix = {
+        {0, 0, 1, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 1, 1, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 1, 1, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 1, 1, 1, 1, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 1, 0, 0, 0, 1, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 1, 0, 0, 1, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    };
+    
+// ez a maszk a következő állapot kiszámításához 
+    static boolean[][] mask = new boolean[MATRIX_DIM][MATRIX_DIM];
+
+/* a változtatások beleírása a matrix-ba és a kiíratás egy eljárásban   
+ugyanitt vizsgálom, hogy valtozott-e a matrix (hasChanged)
+    hasChanged static változó, a main-ben használtam a ciklus feltételben.
+*/
+    static void applyAndShow(int y, int x) {
+        
+        int prev = matrix[y][x];
+        int newState = (mask[y][x]) ? 1 : 0;
+        matrix[y][x] = newState;
+        if (newState !=prev ) hasChanged = true;
+        
+        System.out.print("\u001B[47m");             //grey background
+        switch (newState) {
+            case 0:
+                System.out.print("  ");
+                break;
+            case 1:
+                if ( newState == prev){
+                System.out.print("\u001B[32m()");   //green ()
+                break;                    
+                }
+                else
+                System.out.print("\u001B[35m()");   //purple ()
+                break;
+        }
+        if (x == matrix[0].length - 1) {
+            System.out.println("");
+        }
+    }
+    /*
+Végigpásztázza a mátrixot (Y X) . . . 
+Apply paraméter választ:
+- ha False akkor számolja a következő játékállást
+-ha True   akkor frissíti a matrix-ot és kiíratja
+     */
+    static void scanMatrix(boolean apply) {
+
+        for (int y = 0; y < matrix.length; y++) {
+            for (int x = 0; x < matrix[1].length; x++) {
+
+                if (!apply) validateMatrix(y, x);
+                else applyAndShow(y, x);    
+            }
+        }
+    }
+
+    /*   int z=0 for ciklus arra van, hogy megszámlálja a szomszédokat
+ a végtelenítést cirkuláris aritmetikával oldottam meg
+    */
+    static void validateMatrix(int y, int x) {
+        int adjacent = 0;
+        int current = matrix[y][x];
+
+        for (int z = 0; z < vectors.length; z++) {
+            int yVec = vectors[z][0]+y;
+            if (yVec<0) yVec+=MATRIX_DIM;
+            int xVec = vectors[z][1]+x;
+            if (xVec<0) xVec+=MATRIX_DIM;            
+            if (matrix[yVec%MATRIX_DIM][xVec%MATRIX_DIM] > 0) {
+                ++adjacent;
+            }
+        }
+        switch (current) {
+            case 0:
+                mask[y][x] = (adjacent == 3);
+                break;
+            case 1:
+                mask[y][x] = (adjacent == 2 | adjacent == 3);
+                break;
+
+        }
+    }
+
+    public static void main(String[] args) {
+
+        System.out.println("\u001B[47m \u001B[35m" + 
+                "Életjáték --- NYOMJ ENTER-T A TOVÁBBLÉPÉSHEZ ");
+        int count = 0;
+        sc.nextLine();
+        do {
+            System.out.println("\n\n\n\nPHASE: " + (++count));
+            hasChanged = false;
+            scanMatrix(false);
+            scanMatrix(true);
+            addDelay();
+        } while (hasChanged);
+    }
+
+
+
+    static void addDelay() {
+
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+    }
+
+
+}
