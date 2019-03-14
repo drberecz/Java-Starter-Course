@@ -1,0 +1,41 @@
+public class RoboSnake {
+
+    
+static char BLOCK = 'X';
+static char FOOD  = '*';
+static char HEAD  = 'O';
+static boolean GAME_IS_ON= true;
+
+
+static int  BOARD_DIM_Y = 30;
+static int  BOARD_DIM_X = 50;
+static int  START_POS_Y = 3;
+static int  START_POS_X = 3;
+static int NUM_OF_FOOD  = BOARD_DIM_X * BOARD_DIM_Y /3;
+
+static String[][] COMMANDS = {
+    { "Jobb","5" }, { "le","3" }, { "Jobb","5" }, { "fel","2" }, { "Jobb","5" },
+    { "le","5" }, { "bal","3" }, { "fel","1" }, { "bal","2" }, { "le","5" },
+    {"vege","0"}
+};    
+
+static int    cmdIndex = 0;
+static String currComm = "Jobbra";
+        
+static int[]  snkHead =  {START_POS_Y, START_POS_X} ; 
+static char[][] board = new char[BOARD_DIM_Y][BOARD_DIM_X];
+
+        
+static void initBoard (){}
+static void placeFood (){}
+static void initSnk   (){}
+
+//main cycle
+        static void moveSnk (){};//    --> static void getCommand();
+        static boolean checkCollision (){return true;}
+        static boolean checkFood (){return false;}
+        static void updateSnkLength (){}
+        static void drawBoard (){}
+        static void addDelay (){};
+//end
+}
