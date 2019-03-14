@@ -16,6 +16,7 @@ public class GameOfLife {
 
         
 // ÁLLAPOTOK:   0 nincs,   1 van
+// kisebb legyen, mint a matrix, és egyenlő széles/magas
     static int[][] template = {
         {0, 0, 1, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
         {0, 0, 0, 1, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
@@ -82,15 +83,16 @@ Végigpásztázza a mátrixot (Y X) . . .
 Apply paraméter választ:
 - ha False akkor számolja a következő játékállást
 -ha True   akkor frissíti a matrix-ot és kiíratja
+Copy paraméter: ha True, bemásolja a kis mintát(template) a matrixba
      */
     static void scanMatrix(boolean copy, boolean apply) {
 
         for (int y = 0; y < matrix.length; y++) {
             for (int x = 0; x < matrix[1].length; x++) {
 
-                if (copy) copyTemplate(y, x);
-                if (!copy & !apply) validateMatrix(y, x);
-                else if (apply) applyAndShow(y, x);    
+                if (copy)        copyTemplate(y, x);
+                else if (!apply) validateMatrix(y, x);
+                else             applyAndShow(y, x);    
             }
         }
     }
@@ -138,7 +140,7 @@ Apply paraméter választ:
         for (int i = 0; i < template.length; i++) {
             if ( template[i].length != template.length ){
                 System.out.println("Elírtad a Template-ben a számokat.Hiba");
-                System.exit(0);
+                System.exit(1);
             }
         }
         
