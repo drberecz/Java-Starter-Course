@@ -59,7 +59,7 @@ ugyanitt vizsgálom, hogy valtozott-e a matrix (hasChanged)
         System.out.print("\u001B[47m");             //grey background
         switch (newState) {
             case 0:
-                String tmp=( newState != prev)? "\u001B[32m~~" : "  "; 
+                String tmp=( newState != prev)? "\u001B[34m ." : "  "; 
                 System.out.print(tmp);
                 break;
             case 1:
