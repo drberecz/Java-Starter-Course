@@ -6,24 +6,23 @@ public class RoboSnake {
     static char FOOD = '*';
     static char HEAD = 'O';
     static char BLANK = ' ';
-    static boolean GAME_IS_ON = true;
 
     static int DELAY_MILLISEC = 500;
     static int BOARD_DIM_Y = 20;
     static int BOARD_DIM_X = 40;
     static int START_POS_Y = 3;
     static int START_POS_X = 3;
-    static int NUM_OF_FOOD = BOARD_DIM_X * BOARD_DIM_Y / 3;
+    static int NUM_OF_FOOD = BOARD_DIM_X * BOARD_DIM_Y / 5;
 
+    // ezekkel az utasításokkal irányítod a kígyót:  IRÁNY -- HÁNYAT LÉPJEN
     static String[][] COMMANDS = {
         {"Jobb", "5"}, {"le", "3"}, {"Jobb", "5"}, {"fel", "2"}, {"Jobb", "5"},
         {"le", "5"}, {"bal", "3"}, {"fel", "1"}, {"bal", "2"}, {"le", "5"},
-        {"vege", "0"}
+        {"bal", "5"}, {"fel", "10"}, {"jobb", "20"}
     };
 
     static int cmdIndex = 0;
     static int cmdCountDown = 0;
-    static String currComm = "Jobbra";
 
     static LinkedList<Integer> snkBodyY = new LinkedList<Integer>();
     static LinkedList<Integer> snkBodyX = new LinkedList<Integer>();
@@ -42,8 +41,19 @@ public class RoboSnake {
     }
 
     static void placeFood() {
+        int num = NUM_OF_FOOD;
+        while (num != 0) {
+            int y = (int) (Math.random() * BOARD_DIM_Y);
+            int x = (int) (Math.random() * BOARD_DIM_X);
+            if (board[y][x] != BLOCK) {
+                --num;
+                board[y][x] = FOOD;
+            }
+        }
+
     }
 
+// először kirajzol 5 egység kígyót jobbra , start pozició 3:3
     static void initSnk() {
 
         for (int i = 0; i < 5; i++) {
@@ -55,63 +65,70 @@ public class RoboSnake {
         }
     }
 
-//        static void moveSnk (){};//    --> static void getCommand();
-//        static boolean checkCollision (){return true;}
-//        static boolean checkFood (){return false;}
-//        static void updateSnkLength (){}
+    static boolean checkCollision() {
 
-static String getCommand(){
-    
-    String currComm = COMMANDS[cmdIndex][0];
-    if (cmdCountDown<=0 & cmdIndex<COMMANDS.length-1){
-        ++cmdIndex;
-        cmdCountDown = Integer.parseInt(COMMANDS[cmdIndex][1]);
+        return (board[snkHead[0]][snkHead[1]] == BLOCK);
+
     }
-    --cmdCountDown;
-    return currComm;
-}
 
+    static boolean checkFood() {
+
+        return (board[snkHead[0]][snkHead[1]] == FOOD);
+    }
+
+    static String getCommand() {
+
+        String currComm = COMMANDS[cmdIndex][0];
+        if (cmdCountDown <= 0 & cmdIndex < COMMANDS.length - 1) {
+            ++cmdIndex;
+            cmdCountDown = Integer.parseInt(COMMANDS[cmdIndex][1]);
+        }
+        --cmdCountDown;
+        return currComm;
+    }
 
     static void moveSnk() {
-    
-    snkBodyY.add(snkHead[0]);
-    snkBodyX.add(snkHead[1]);
-    board[snkHead[0]][snkHead[1]] = BLOCK;
-        
-    String currComm = getCommand().toUpperCase();
-    char cmd = currComm.charAt(0);
-        
-    switch(cmd){
-        case 'B':
-            --snkHead[1]; break;
-        case 'J':
-            ++snkHead[1]; break;            
-        case 'F':
-            --snkHead[0]; break;
-        case 'L':
-            ++snkHead[0]; break;
-    }
-    
-    
+
+        snkBodyY.add(snkHead[0]);
+        snkBodyX.add(snkHead[1]);
+        board[snkHead[0]][snkHead[1]] = BLOCK;
+
+        String currComm = getCommand().toUpperCase();
+        char cmd = currComm.charAt(0);
+
+        switch (cmd) {
+            case 'B':
+                --snkHead[1];
+                break;
+            case 'J':
+                ++snkHead[1];
+                break;
+            case 'F':
+                --snkHead[0];
+                break;
+            case 'L':
+                ++snkHead[0];
+                break;
+        }
+
     }
 
     static void drawBoard(boolean gotFood) {
 
-        
+        System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
         board[snkHead[0]][snkHead[1]] = HEAD;
-        if (!gotFood){
+        if (!gotFood) {
             int y = snkBodyY.removeFirst();
-            int x = snkBodyX.removeFirst(); 
+            int x = snkBodyX.removeFirst();
             board[y][x] = BLANK;
         }
-        
+
         for (int y = 0; y < BOARD_DIM_Y; y++) {
             for (int x = 0; x < BOARD_DIM_X; x++) {
                 System.out.print(board[y][x]);
             }
             System.out.println("");
         }
-        System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
     }
 
     static void addDelay() {
@@ -129,14 +146,15 @@ static String getCommand(){
 public static void main(String[] args) {
         initBoard();
         initSnk();
-        
-        do{
-            GAME_IS_ON = true;
+        placeFood();
+        boolean gameOver;
+        do {
             moveSnk();
-            drawBoard(false);
+            gameOver = checkCollision();
+            boolean gotFood = checkFood();
+            drawBoard(gotFood);
             addDelay();
-        }while (GAME_IS_ON);
+        } while (!gameOver);
     }
 
 }
-
