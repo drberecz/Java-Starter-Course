@@ -58,21 +58,13 @@ ugyanitt vizsgálom, hogy valtozott-e a matrix (hasChanged)
         System.out.print("\u001B[47m");             //grey background
         switch (newState) {
             case 0:
-                if ( newState != prev){
-                    System.out.print("\u001B[32m~~");   //green ~~
-                    break;                    
-                }
-                else
-                    System.out.print("  ");
+                String tmp=( newState != prev)? "\u001B[32m~~" : "  "; 
+                System.out.print(tmp);
                 break;
             case 1:
-                if ( newState == prev){
-                    System.out.print("\u001B[32m()");   //green ()
-                    break;                    
-                }
-                else
-                    System.out.print("\u001B[35m()");   //purple ()
-                    break;
+                String tmp2=(newState == prev)? "\u001B[32m()" : "\u001B[35m()"; 
+                System.out.print(tmp2);
+                break;                
         }
         if (x == matrix[0].length - 1) {
             System.out.println("");
@@ -171,3 +163,4 @@ Copy paraméter: ha True, bemásolja a kis mintát(template) a matrixba
 
 
 }
+
