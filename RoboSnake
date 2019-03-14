@@ -1,3 +1,6 @@
+import java.util.LinkedList;
+
+
 public class RoboSnake {
 
     
@@ -7,8 +10,8 @@ static char HEAD  = 'O';
 static boolean GAME_IS_ON= true;
 
 
-static int  BOARD_DIM_Y = 30;
-static int  BOARD_DIM_X = 50;
+static int  BOARD_DIM_Y = 20;
+static int  BOARD_DIM_X = 40;
 static int  START_POS_Y = 3;
 static int  START_POS_X = 3;
 static int NUM_OF_FOOD  = BOARD_DIM_X * BOARD_DIM_Y /3;
@@ -21,21 +24,71 @@ static String[][] COMMANDS = {
 
 static int    cmdIndex = 0;
 static String currComm = "Jobbra";
-        
+      
+
+static LinkedList<Integer> snkBodyY = new LinkedList<Integer>(); 
+static LinkedList<Integer> snkBodyX = new LinkedList<Integer>(); 
 static int[]  snkHead =  {START_POS_Y, START_POS_X} ; 
 static char[][] board = new char[BOARD_DIM_Y][BOARD_DIM_X];
 
         
-static void initBoard (){}
-static void placeFood (){}
-static void initSnk   (){}
+static void initBoard (){
 
-//main cycle
-        static void moveSnk (){};//    --> static void getCommand();
-        static boolean checkCollision (){return true;}
-        static boolean checkFood (){return false;}
-        static void updateSnkLength (){}
-        static void drawBoard (){}
+    for (int y = 0; y < BOARD_DIM_Y; y++) {
+        for (int x = 0; x < BOARD_DIM_X; x++) {
+            board[y][x] = (y==0 | y==BOARD_DIM_Y-1 |
+                           x==0 | x==BOARD_DIM_X-1  )? BLOCK : ' ';
+     
+        }
+    }
+}
+
+
+
+
+static void placeFood (){}
+static void initSnk   (){
+
+        for (int i = 0; i <5 ; i++) {
+
+        snkBodyY.add(START_POS_Y);
+        snkBodyY.add(START_POS_X + i);
+        board[snkHead[0]][snkHead[1]] = BLOCK;
+        snkHead[1]++;
+        }
+        board[snkHead[0]][snkHead[1]] = HEAD;
+}
+
+
+//        static void moveSnk (){};//    --> static void getCommand();
+//        static boolean checkCollision (){return true;}
+//        static boolean checkFood (){return false;}
+//        static void updateSnkLength (){}
+
+static void moveSnk (){
+    
+    
+}
+
+
+static void drawBoard (){
+
+    for (int y = 0; y < BOARD_DIM_Y; y++) {
+        for (int x = 0; x < BOARD_DIM_X; x++) {
+            System.out.print(board[y][x]);
+        }
+        System.out.println("");
+    }
+}
+        
         static void addDelay (){};
 //end
+
+public static void main(String[] args) {
+        initBoard();
+        initSnk();
+        drawBoard();
+    }
+
+
 }
