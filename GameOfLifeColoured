@@ -17,6 +17,7 @@ public class GameOfLife {
         
 // ÁLLAPOTOK:   0 nincs,   1 van
 // kisebb legyen, mint a matrix, és egyenlő széles/magas
+// A kezdőállás: 1 glider, 1 spaceship, 1 oscillator, 1 still life
     static int[][] template = {
         {0, 0, 1, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
         {0, 0, 0, 1, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
