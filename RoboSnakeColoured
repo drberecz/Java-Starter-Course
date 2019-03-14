@@ -1,0 +1,177 @@
+import java.util.LinkedList;
+
+public class RoboSnake {
+
+    static char BLOCK = 'X';
+    static char FOOD = '*';
+    static char HEAD = 'O';
+    static char BLANK = ' ';
+
+    static int DELAY_MILLISEC = 500;
+    static int BOARD_DIM_Y = 20;
+    static int BOARD_DIM_X = 40;
+    static int START_POS_Y = 3;
+    static int START_POS_X = 3;
+    static int NUM_OF_FOOD = BOARD_DIM_X * BOARD_DIM_Y / 5;
+
+    // ezekkel az utasításokkal irányítod a kígyót:  IRÁNY -- HÁNYAT LÉPJEN
+    static String[][] COMMANDS = {
+        {"Jobb", "5"}, {"le", "3"}, {"Jobb", "5"}, {"fel", "2"}, {"Jobb", "5"},
+        {"le", "5"}, {"bal", "3"}, {"fel", "1"}, {"bal", "2"}, {"le", "5"},
+        {"bal", "5"}, {"fel", "10"}, {"jobb", "20"}
+    };
+
+    static int cmdIndex = 0;
+    static int cmdCountDown = 0;
+
+    static LinkedList<Integer> snkBodyY = new LinkedList<Integer>();
+    static LinkedList<Integer> snkBodyX = new LinkedList<Integer>();
+    static int[] snkHead = {START_POS_Y, START_POS_X};
+    static char[][] board = new char[BOARD_DIM_Y][BOARD_DIM_X];
+
+    static void initBoard() {
+
+        for (int y = 0; y < BOARD_DIM_Y; y++) {
+            for (int x = 0; x < BOARD_DIM_X; x++) {
+                board[y][x] = (y == 0 | y == BOARD_DIM_Y - 1
+                        | x == 0 | x == BOARD_DIM_X - 1) ? BLOCK : ' ';
+
+            }
+        }
+    }
+
+    static void placeFood() {
+        int num = NUM_OF_FOOD;
+        while (num != 0) {
+            int y = (int) (Math.random() * BOARD_DIM_Y);
+            int x = (int) (Math.random() * BOARD_DIM_X);
+            if (board[y][x] != BLOCK) {
+                --num;
+                board[y][x] = FOOD;
+            }
+        }
+
+    }
+
+// először kirajzol 5 egység kígyót jobbra , start pozició 3:3
+    static void initSnk() {
+
+        for (int i = 0; i < 5; i++) {
+
+            snkBodyY.add(START_POS_Y);
+            snkBodyX.add(START_POS_X + i);
+            board[snkHead[0]][snkHead[1]] = BLOCK;
+            snkHead[1]++;
+        }
+    }
+
+    static boolean checkCollision() {
+
+        return (board[snkHead[0]][snkHead[1]] == BLOCK);
+
+    }
+
+    static boolean checkFood() {
+
+        return (board[snkHead[0]][snkHead[1]] == FOOD);
+    }
+
+    static String getCommand() {
+
+        String currComm = COMMANDS[cmdIndex][0];
+        if (cmdCountDown <= 0 & cmdIndex < COMMANDS.length - 1) {
+            ++cmdIndex;
+            cmdCountDown = Integer.parseInt(COMMANDS[cmdIndex][1]);
+        }
+        --cmdCountDown;
+        return currComm;
+    }
+
+    static void moveSnk() {
+
+        snkBodyY.add(snkHead[0]);
+        snkBodyX.add(snkHead[1]);
+        board[snkHead[0]][snkHead[1]] = BLOCK;
+
+        String currComm = getCommand().toUpperCase();
+        char cmd = currComm.charAt(0);
+
+        switch (cmd) {
+            case 'B':
+                --snkHead[1];
+                break;
+            case 'J':
+                ++snkHead[1];
+                break;
+            case 'F':
+                --snkHead[0];
+                break;
+            case 'L':
+                ++snkHead[0];
+                break;
+        }
+
+    }
+
+    static void drawBoard(boolean gotFood, int score) {
+
+        System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\u001B[47m");
+        board[snkHead[0]][snkHead[1]] = HEAD;
+        if (!gotFood) {
+            int y = snkBodyY.removeFirst();
+            int x = snkBodyX.removeFirst();
+            board[y][x] = BLANK;
+        }
+
+        System.out.println("PONTSZAM: "  + score);
+        for (int y = 0; y < BOARD_DIM_Y; y++) {
+                String str = "";
+            for (int x = 0; x < BOARD_DIM_X; x++) {
+                char tmp = board[y][x];
+              
+                switch(tmp){
+                    case ' ':
+                        str += "\u001B[47m\u001B[30m "; break;
+                    case 'X':
+                        str += "\u001B[45m\u001B[37mX"; break;                        
+                    case '*':
+                        str += "\u001B[47m\u001B[30m*"; break;                     
+                    case 'O':
+                        str += "\u001B[44m\u001B[33mO"; break;    
+                        
+                }
+            }
+            System.out.print(str + "\n");
+        }
+    }
+
+    static void addDelay() {
+        try {
+            Thread.sleep(DELAY_MILLISEC);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+
+    }
+
+    ;
+
+
+public static void main(String[] args) {
+        initBoard();
+        initSnk();
+        placeFood();
+        
+        boolean gameOver;
+        int pontok = 0;
+        do {
+            moveSnk();
+            gameOver = checkCollision();
+            boolean gotFood = checkFood();
+            if (gotFood) ++pontok;
+            drawBoard(gotFood, pontok);
+            addDelay();
+        } while (!gameOver);
+    }
+
+}
