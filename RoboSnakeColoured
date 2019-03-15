@@ -2,21 +2,21 @@ import java.util.LinkedList;
 
 public class RoboSnake {
 
-    static char BLOCK = 'X';
-    static char FOOD = '*';
-    static char HEAD = 'O';
-    static char BLANK = ' ';
+    static final char BLOCK = 'X';
+    static final char FOOD = '*';
+    static final char HEAD = 'O';
+    static final char BLANK = ' ';
 
-    static int DELAY_MILLISEC = 500;
-    static int BOARD_DIM_Y = 20;
-    static int BOARD_DIM_X = 40;
-    static int START_POS_Y = 3;
-    static int START_POS_X = 3;
-    static int NUM_OF_FOOD = BOARD_DIM_X * BOARD_DIM_Y / 5;
+    static final int DELAY_MILLISEC = 500;
+    static final int BOARD_DIM_Y = 20;
+    static final int BOARD_DIM_X = 40;
+    static final int START_POS_Y = 3;
+    static final int START_POS_X = 3;
+    static final int NUM_OF_FOOD = BOARD_DIM_X * BOARD_DIM_Y / 5;
 
     // ezekkel az utasításokkal irányítod a kígyót:  IRÁNY -- HÁNYAT LÉPJEN
     static String[][] COMMANDS = {
-        {"Jobb", "5"}, {"le", "3"}, {"Jobb", "5"}, {"fel", "2"}, {"Jobb", "5"},
+        {"Jobbkezdo", "2"}, {"le", "3"}, {"Jobb", "5"}, {"fel", "2"}, {"Jobb", "5"},
         {"le", "5"}, {"bal", "3"}, {"fel", "1"}, {"bal", "2"}, {"le", "5"},
         {"bal", "5"}, {"fel", "10"}, {"jobb", "20"}
     };
@@ -24,11 +24,9 @@ public class RoboSnake {
     static int cmdIndex = 0;
     static int cmdCountDown = 0;
 
-    static LinkedList<Integer> snkBodyY = new LinkedList<Integer>();
-    static LinkedList<Integer> snkBodyX = new LinkedList<Integer>();
-    static int[] snkHead = {START_POS_Y, START_POS_X};
     static char[][] board = new char[BOARD_DIM_Y][BOARD_DIM_X];
 
+    
     static void initBoard() {
 
         for (int y = 0; y < BOARD_DIM_Y; y++) {
@@ -54,24 +52,23 @@ public class RoboSnake {
     }
 
 // először kirajzol 5 egység kígyót jobbra , start pozició 3:3
-    static void initSnk() {
+    static void initSnk(LinkedList snkBody, Integer[] snkHead) {
 
         for (int i = 0; i < 5; i++) {
-
-            snkBodyY.add(START_POS_Y);
-            snkBodyX.add(START_POS_X + i);
-            board[snkHead[0]][snkHead[1]] = BLOCK;
+            Integer[] bodyPart = { START_POS_Y, START_POS_X+i};
+            snkBody.add(bodyPart);
+            board[bodyPart[0]][bodyPart[1]] = BLOCK;
             snkHead[1]++;
         }
     }
 
-    static boolean checkCollision() {
+    static boolean checkCollision(Integer[] snkHead) {
 
         return (board[snkHead[0]][snkHead[1]] == BLOCK);
 
     }
 
-    static boolean checkFood() {
+    static boolean checkFood(Integer[] snkHead) {
 
         return (board[snkHead[0]][snkHead[1]] == FOOD);
     }
@@ -79,19 +76,20 @@ public class RoboSnake {
     static String getCommand() {
 
         String currComm = COMMANDS[cmdIndex][0];
-        if (cmdCountDown <= 0 & cmdIndex < COMMANDS.length - 1) {
+        if (cmdCountDown <= 0 ) {
             ++cmdIndex;
+            if ( !(cmdIndex < COMMANDS.length - 1)) cmdIndex = 0;
             cmdCountDown = Integer.parseInt(COMMANDS[cmdIndex][1]);
         }
         --cmdCountDown;
         return currComm;
     }
 
-    static void moveSnk() {
+    static void moveSnk(LinkedList snkBody, Integer[] snkHead) {
 
-        snkBodyY.add(snkHead[0]);
-        snkBodyX.add(snkHead[1]);
-        board[snkHead[0]][snkHead[1]] = BLOCK;
+        Integer[] bodyPart = { snkHead[0], snkHead[1]};
+        snkBody.add(bodyPart);
+        board[bodyPart[0]][bodyPart[1]] = BLOCK;
 
         String currComm = getCommand().toUpperCase();
         char cmd = currComm.charAt(0);
@@ -113,17 +111,17 @@ public class RoboSnake {
 
     }
 
-    static void drawBoard(boolean gotFood, int score) {
+    static void drawBoard(LinkedList snkBody, Integer[] snkHead, boolean gotFood, int score) {
 
         System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\u001B[47m");
-        board[snkHead[0]][snkHead[1]] = HEAD;
         if (!gotFood) {
-            int y = snkBodyY.removeFirst();
-            int x = snkBodyX.removeFirst();
-            board[y][x] = BLANK;
+            Integer[] bodyPart = (Integer[]) snkBody.removeFirst();
+            System.out.println(bodyPart[0] + "..." + bodyPart[1]);
+            board[bodyPart[0]][bodyPart[1]] = ' ';
         }
+        board[snkHead[0]][snkHead[1]] = HEAD;
 
-        System.out.println("PONTSZAM: "  + score);
+        System.out.println("snkBody size: " + snkBody.size());
         for (int y = 0; y < BOARD_DIM_Y; y++) {
                 String str = "";
             for (int x = 0; x < BOARD_DIM_X; x++) {
@@ -158,18 +156,22 @@ public class RoboSnake {
 
 
 public static void main(String[] args) {
-        initBoard();
-        initSnk();
+
+    LinkedList<Integer[]> snkBody = new LinkedList<>();
+    Integer[] snkHead = {START_POS_Y, START_POS_X};
+    
+    initBoard();
+        initSnk(snkBody, snkHead);
         placeFood();
         
         boolean gameOver;
         int pontok = 0;
         do {
-            moveSnk();
-            gameOver = checkCollision();
-            boolean gotFood = checkFood();
+            moveSnk(snkBody, snkHead);
+            gameOver = checkCollision(snkHead);
+            boolean gotFood = checkFood(snkHead);
             if (gotFood) ++pontok;
-            drawBoard(gotFood, pontok);
+            drawBoard(snkBody, snkHead, gotFood, pontok);
             addDelay();
         } while (!gameOver);
     }
