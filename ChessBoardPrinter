@@ -1,0 +1,45 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package bh.jsc04;
+
+/**
+ *
+ * @author lborisz
+ */
+public class ChessBoardPrinter {
+  
+  public static void printABC(){
+    System.out.println("    A   B   C   D   E   F   G   H");
+  }
+  
+  public static void printBoard(){
+
+    System.out.println("  ---------------------------------      Levett Bábuk: ");
+    for (int row = 1; row <= 8; row++) {
+      System.out.print(row+" ");
+      for (int column = 1; column <= 8; column++) {
+        
+        System.out.print(Chess.board[row][column] == ' ' ?  "| " + square(row+column) + " " :
+                                     "| " + Chess.board[row][column] + " ");
+        //\u2B1B, \u2588, \u2591
+      }
+      System.out.print("|       \u001B[47m");
+        for (int i =(row-1)*4; i < Chess.figuresRemoved.size(); i++) {
+            if (i == ((row-1)*4)+4) break;
+            System.out.print(Chess.figuresRemoved.get(i));
+        }
+
+      System.out.println("\u001B[0m");
+      System.out.println("  ---------------------------------");
+    }
+    printABC();
+  }
+
+  public static char square(int i) {
+    return i%2!=0? '\u2588' : '\u2591'; 
+  }
+  
+}
