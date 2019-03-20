@@ -106,6 +106,19 @@ public class Chess {
     if (figure == BLACK_ROOK || figure == WHITE_ROOK){
       return checkRookRule(from_row, from_column, to_row, to_column);
     }
+    if (figure == BLACK_QUEEN || figure == WHITE_QUEEN){
+        int vectorY = to_column -from_column;
+        int vectorX = to_row - from_row;
+        boolean isValidQueenMove = ( vectorY==0 | vectorX==0 ) ?
+                checkRookRule(from_row, from_column, to_row, to_column) :
+                checkBishopRule(from_row, from_column, to_row, to_column);
+                
+        System.out.println("Queenmove is>" + isValidQueenMove);
+        return isValidQueenMove;
+    }    
+    
+
+    
     
     
     return true;
@@ -129,7 +142,7 @@ public class Chess {
           y1+= signY; // y1,x1 lokál változók, szimulálja a lépéseket egyesével 
           x1+= signX;
           char piece = board[y1][x1];
-          if (  piece!= ' ' ) {
+          if (  piece!= ' ' & (y1!=y2 & x1!=x2) ) {
               System.out.println("debug: Útban van egy bábu: "+ piece);
               return false;
           }
