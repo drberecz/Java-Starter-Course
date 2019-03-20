@@ -1,0 +1,84 @@
+/*
+koordinata geometria wikipedia
+* To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package bh.jsc04;
+
+import java.util.Scanner;
+
+/**
+ *
+ * @author lborisz
+ */
+public class Game {
+  
+  public static int player_flag = 0, // 0 white, 1 black
+                    from_row = 0, // A, B, C... (1-8)
+                    to_row = 0, // A, B, C... (1-8)
+                    from_column = 0, // 1 - 8
+                    to_column = 0; // 1 - 8
+  
+  public static void play(){
+    boolean exit = false;
+    Scanner scanner = new Scanner(System.in);
+    do {
+      ChessBoardPrinter.printBoard();
+      String currPlyr = (player_flag==0) ? "Világos" : "Sötét"; 
+        System.out.println("Mit lépsz - " + currPlyr+ " ?: ");
+      String inputLine = scanner.nextLine().trim();
+      if ("exit".equals(inputLine)){
+        exit = true;
+      } else {
+        if (checkInputLine(inputLine)){
+          if (Chess.move(player_flag, from_row, from_column, to_row, to_column)){
+            player_flag = player_flag == 0 ? 1 : 0;
+          } else {
+              System.out.println((player_flag+1) + ". játékos lép");
+          }
+        }
+      }
+    } while (!exit);
+  }
+  
+  public static boolean checkInputLine(String inputLine){
+    if (null == inputLine || "".equals(inputLine)){
+      System.out.println("Nem megfelelő adatbevitel.");
+      return false;
+    } 
+    if (inputLine.length() != 5){
+      System.out.println("Nem megfelelő adatbevitel.");
+      return false;
+    }
+    char[] inputChars = inputLine.toCharArray();
+//    if ((inputChars[0] < 'a' || inputChars[0] > 'f') || 
+//        (inputChars[1] < '1' || inputChars[1] > '8') ||
+//         inputChars[2] != ' ' ||
+//        (inputChars[3] < 'a' || inputChars[3] > 'f') || 
+//        (inputChars[4] < '1' || inputChars[4] > '8')){
+
+if (    !((inputChars[0] >= 'a' && inputChars[0] <= 'h') && 
+        (inputChars[1] >= '1' && inputChars[1] <= '8') &&
+         inputChars[2] == ' ' && 
+        (inputChars[3] >= 'a' && inputChars[3] <= 'h') && 
+        (inputChars[4] >= '1' && inputChars[4] <= '8'))
+   ){
+      System.out.println("Nem megfelelő adatbevitel.");
+      return false;
+    } else {
+      from_column = (int)inputChars[0] - 96;
+      from_row = inputChars[1] - 48;
+      
+      to_column = (int)inputChars[3] - 96;
+      to_row = inputChars[4] - 48;
+    }
+    return true;
+  }
+  
+  public static void main(String[] args) {
+    Chess.init();
+    play();
+  }
+  
+}
