@@ -1,247 +1,85 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
+koordinata geometria wikipedia
+* To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package bh.jsc04;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Scanner;
 
 /**
  *
  * @author lborisz
  */
-public class Chess {
-
-  public static final char WHITE_KING = '\u2654';
-  public static final char BLACK_KING = '\u265A';
-  public static final char WHITE_QUEEN = '\u2655';
-  public static final char BLACK_QUEEN = '\u265B';
-
-  public static final char WHITE_ROOK = '\u2656';
-  public static final char BLACK_ROOK = '\u265C';
-  public static final char WHITE_KNIGHT = '\u2658';
-  public static final char BLACK_KNIGHT = '\u265E';
-  public static final char WHITE_BISHOP = '\u2657';
-  public static final char BLACK_BISHOP = '\u265D';
-
-  public static final char WHITE_PAWN = '\u2659';
-  public static final char BLACK_PAWN = '\u265F';
-
-  public static char[][] board = new char[9][9];
-
-  public static final char[] WHITE_FIGURES = {WHITE_PAWN, WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN, WHITE_KING};
-  public static final char[] BLACK_FIGURES = {BLACK_PAWN, BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING};
-
-  public static char[] wfq = {' ', ' ', WHITE_PAWN, ' ', WHITE_PAWN, ' ', WHITE_PAWN, ' ', WHITE_PAWN,};
-  public static char[] bfq = {' ', BLACK_PAWN, ' ', BLACK_PAWN, ' ', BLACK_PAWN, ' ', BLACK_PAWN, ' ',};
-
-  public static char[] wrq = {' ', WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_KING, WHITE_QUEEN, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK,};
-  public static char[] brq = {' ', BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK,};
-
-  public static List <Character> figuresRemoved = new ArrayList<>();
+public class Game {
   
+  public static int player_flag = 0, // 0 white, 1 black
+                    from_row = 0, // A, B, C... (1-8)
+                    to_row = 0, // A, B, C... (1-8)
+                    from_column = 0, // 1 - 8
+                    to_column = 0; // 1 - 8
   
-  public static void init() {
-    
-    for (int i = 0; i < 9; i++) {
-        Arrays.fill (board[i], ' ');     
-    }
-    board[1] = wrq;
-    board[2] = wfq;
-    board[7] = bfq;
-    board[8] = brq;
-      figuresRemoved.add('\u2620');  
-      for (int i = 0; i < 4; i++) {
-          figuresRemoved.add(WHITE_PAWN);
-          figuresRemoved.add(BLACK_PAWN);
+  public static void play(){
+    boolean exit = false;
+    Scanner scanner = new Scanner(System.in);
+    do {
+      ChessBoardPrinter.printBoard();
+      String currPlyr = (player_flag==0) ? "Világos" : "Sötét"; 
+        System.out.println("Mit lépsz - " + currPlyr+ " ?: ");
+      String inputLine = scanner.nextLine().trim();
+      if ("exit".equals(inputLine)){
+        exit = true;
+      } else {
+        if (checkInputLine(inputLine)){
+          if (Chess.move(player_flag, from_row, from_column, to_row, to_column)){
+            player_flag = player_flag == 0 ? 1 : 0;
+          } 
+        }
       }
-
+    } while (!exit);
   }
   
-  
-  
-//  public static void main(String[] args) {
-//    //ChessBoardPrinter.printBoard();
-//    System.out.println((int) 'a');//-96
-//    for (char k = '1'; k <= '8'; k++) {
-//      System.out.println((int) k);
-//    }
-//  }
-
-  public static boolean move(int player_flag, int from_row, int from_column, int to_row, int to_column) {
-    char figure = board[from_row][from_column];
-    char target = board[to_row][to_column];
-    System.out.println("move: " + (player_flag+1) + ". játékos lépés kiértékelés");
-    if (!isValidFigure(player_flag, figure)){
-        System.out.println("Azon a mezőn nincs saját figurád ");
-      return false;
-    }
-   
-    if (!checkRule(figure, from_row, from_column, to_row, to_column)){
-      return false;
-    }else if ( isValidFigure(player_flag, target)){
-        System.out.println("Saját bábut (" + target + ") nem üthetsz");
+  public static boolean checkInputLine(String inputLine){
+    if (null == inputLine || "".equals(inputLine)){
+      System.out.println("Nem megfelelő adatbevitel.");
       return false;
     } 
-        
-        
-    board[from_row][from_column] = ' ';
-    if ( target!=' ' ) {
-          Chess.figuresRemoved.add(target);
-          System.out.println("\u2620\u2620\u2620 ! Leütötted: (" +target+")");
-    }else 
-          System.out.println("Valid a lépés "); 
-    board[to_row][to_column] = figure;  
-    return true;
-    
-  }
-
-  public static boolean isValidFigure(int player_flag, char figure) {
-    if (figure == ' ') {
+    if (inputLine.length() != 5){
+      System.out.println("Nem megfelelő adatbevitel.");
       return false;
     }
-    int i = 0;
-    if (player_flag == 0) {
-      while (i < WHITE_FIGURES.length && figure != WHITE_FIGURES[i]) {
-        i++;
-      }
+    char[] inputChars = inputLine.toCharArray();
+//    if ((inputChars[0] < 'a' || inputChars[0] > 'f') || 
+//        (inputChars[1] < '1' || inputChars[1] > '8') ||
+//         inputChars[2] != ' ' ||
+//        (inputChars[3] < 'a' || inputChars[3] > 'f') || 
+//        (inputChars[4] < '1' || inputChars[4] > '8')){
+
+if (    !((inputChars[0] >= 'a' && inputChars[0] <= 'h') && 
+        (inputChars[1] >= '1' && inputChars[1] <= '8') &&
+         inputChars[2] == ' ' && 
+        (inputChars[3] >= 'a' && inputChars[3] <= 'h') && 
+        (inputChars[4] >= '1' && inputChars[4] <= '8'))
+   ){
+      System.out.println("Nem megfelelő adatbevitel.");
+      return false;
     } else {
-      while (i < BLACK_FIGURES.length && figure != BLACK_FIGURES[i]) {
-        i++;
-      }
+      from_column = (int)inputChars[0] - 96;
+      from_row = inputChars[1] - 48;
+      
+      to_column = (int)inputChars[3] - 96;
+      to_row = inputChars[4] - 48;
     }
-    return i < BLACK_FIGURES.length ? true : false;
-  }
-
-  public static boolean checkRule(char figure, int from_row, int from_column, int to_row, int to_column) {
-    if (figure == WHITE_PAWN){
-      return checkPawnRule( 1,from_row, from_column, to_row, to_column);
-    }
-    if (figure == BLACK_PAWN){
-      return checkPawnRule( -1,from_row, from_column, to_row, to_column);
-    }
-    if (figure == BLACK_BISHOP || figure == WHITE_BISHOP){
-      return checkBishopRule(from_row, from_column, to_row, to_column);
-    }
-    if (figure == BLACK_ROOK || figure == WHITE_ROOK){
-      return checkRookRule(from_row, from_column, to_row, to_column);
-    }
-    if (figure == BLACK_QUEEN || figure == WHITE_QUEEN){
-        int vectorY = to_column -from_column;
-        int vectorX = to_row - from_row;
-        boolean isValidQueenMove = ( vectorY==0 | vectorX==0 ) ?
-                checkRookRule(from_row, from_column, to_row, to_column) :
-                checkBishopRule(from_row, from_column, to_row, to_column);
-                
-        //System.out.println("Queenmove is>" + isValidQueenMove);
-        return isValidQueenMove;
-    }    
-    
-
-    
-    
-    
     return true;
   }
-
   
-  private static boolean checkBishopRule(int y1, int x1, int y2, int x2) {
-       
-      int vectorY = y2-y1;
-      int vectorX = x2-x1;      
-      int signY   = (vectorY>0) ? 1:-1;     // a teszteléshez kellenek
-      int signX   = (vectorX>0) ? 1:-1;     // a while ciklusban léptet majd
-      // nulla léptetés nem kerül be a while-ba, mert azt kiszűri 
-      if (ruleOutIdle(vectorY, vectorX)) return false;
-      
-      // átlós lépésnél a két vektor abszolút értéke egyezik, ha nem - false
-      if ( Math.abs(vectorY) != Math.abs(vectorX)){
-          System.out.println("(" +board[y1][x1]+") helytelen koordinata");
-          return false;
-      }
-      // ha csak 1-et lép nem kell vizsgálni, van e blokkoló bábu- ?vectorY>1
-      while ( Math.abs(vectorY)!=1 &  y1!=y2 && x1!=x2  ){
-          y1+= signY; // y1,x1 lokál változók, szimulálja a lépéseket egyesével 
-          x1+= signX;
-          char piece = board[y1][x1];
-          if (  piece!= ' ' & (y1!=y2 & x1!=x2) ) {
-              System.out.println("debug: Útban van egy bábu: "+ piece);
-              return false;
-          }
-      }      
-    return true;
+  public static void main(String[] args) throws Exception{
+    ChessHttpConn getScreen = new ChessHttpConn();
+    int temp = getScreen.sendGet();
+    if (temp!=200) System.out.println("Internet connection not successful");
+    Chess.init();
+    play();
   }
-
-
-  private static boolean checkRookRule(int y1, int x1, int y2, int x2) {
-       
-      int vectorY = y2-y1;
-      int vectorX = x2-x1;      
-      if (ruleOutIdle(vectorY, vectorX)) return false;
-
-      if ( vectorY!=0 & vectorX!=0 ){
-          System.out.println("(" +board[y1][x1]+") helytelen koordinata");return false;
-      }
-      if (Math.abs(vectorY)==1 | Math.abs(vectorX)==1) return true;
-      
-      int signY = (vectorY==0) ? 0 : vectorY/Math.abs(vectorY);
-      int signX = (vectorX==0) ? 0 : vectorX/Math.abs(vectorX);
-      
-      while ( y1!=y2 | x1!=x2  ){
-          y1+= signY; 
-          x1+= signX;
-          char piece = board[y1][x1];
-          if (  piece!= ' ' &  (y1!=y2 | x1!=x2)) {
-              System.out.println("debug: Útban van egy bábu: "+ piece);
-              return false;
-          }
-      }      
-    return true;
-  }
-
   
-  private static boolean checkPawnRule(int dirY,int y1, int x1, int y2, int x2) {
-       
-      int vectorY = y2-y1;
-      int vectorYabs = Math.abs(vectorY);
-      int vectorX = x2-x1;     
-      int signY = (vectorY ==0) ? 0 : vectorY/Math.abs(vectorY);    
-      
-      if (ruleOutIdle(vectorY, 0)) return false;
-      if ( y1!=2  & y1!=7 & vectorYabs > 1){
-          System.out.println("a Gyalog csak 1x léphet duplát"); return false;
-      }    
-      if ( signY!=dirY | vectorYabs>2 | Math.abs(vectorX)>1) {
-          System.out.println("("+board[y1][x1]+") helytelen koordinata");
-          return false;
-      }
-      char target = board[y2][x2];      
-      if (vectorX==0 &  target!=' '){
-          System.out.println("Foglalt mező: ("+target+")");
-          return false;
-      }
-      if( vectorX != 0 & target == ' '){
-          System.out.println("A Gyalog üres mezőt nem üthet");
-          return false;
-      }
-      
-      
-      return true;
-  } 
-
-    private static boolean ruleOutIdle ( int vectorY, int vectorX){
-      if ( vectorY ==0 & vectorX ==0) {     
-          System.out.println("Debug: Hiba, helyben maradna a bábu"); return true;
-      }
-
-    return false;    
-    }
-
-
-    
 }
-
-
