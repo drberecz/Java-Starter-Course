@@ -75,9 +75,13 @@ if (    !((inputChars[0] >= 'a' && inputChars[0] <= 'h') &&
   }
   
   public static void main(String[] args) throws Exception{
+      try{
     ChessHttpConn getScreen = new ChessHttpConn();
     int temp = getScreen.sendGet();
-    if (temp!=200) System.out.println("Internet connection not successful");
+      }catch( Exception e){
+        System.out.println("Internet connection not successful");
+      }
+
     Chess.init();
     play();
   }
