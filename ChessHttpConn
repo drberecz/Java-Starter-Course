@@ -1,0 +1,57 @@
+package bh.jsc04;
+
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+
+public class ChessHttpConn {
+
+    private final String USER_AGENT = "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/71.0.3578.98 Chrome/71.0.3578.98 Safari/537.36";
+
+    private final static String URL = "http://www.hidegver.nhely.hu/chess/startscreenBRHchess.txt";
+    private final static String COOKIE
+            = "_ga=GA1.2.580529225.1547313889; _gid=GA1.2.116929180.1547313889; _ga=GA1.2.580529225.1547313889; _gid=GA1.2.116929180.1547313889; JSESSIONID=node01g2py056getaf1m7p5hwdul7iw13404.node0; _gat_gtag_UA_131230489_1=1";
+
+//    public static void main(String[] args) throws Exception {
+//
+//            ChessHttpConn http = new ChessHttpConn();
+//
+//            int temp = http.sendGet();
+//            TimeUnit.MILLISECONDS.sleep(50);
+
+    // HTTP GET request
+    int sendGet() throws Exception {
+
+
+        URL obj = new URL(URL);
+        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+        // optional default is GET
+        con.setRequestMethod("GET");
+
+        //add request header
+        con.setRequestProperty("User-Agent", USER_AGENT);
+        con.setRequestProperty("Accept-Language", "en-US,en;q=0.9");
+        //con.setRequestProperty("Cookie", COOKIE);
+
+        int responseCode = con.getResponseCode();
+        System.out.println("\nSending 'GET' request to URL : " + URL);
+        System.out.println("Response Code : " + responseCode);
+
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(con.getInputStream()));
+        String inputLine;
+
+        while ((inputLine = in.readLine()) != null) {
+            System.out.println(inputLine);
+        }
+        in.close();
+
+    return responseCode;
+    }
+
+}
+
