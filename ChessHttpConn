@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 
 public class ChessHttpConn {
@@ -12,15 +13,7 @@ public class ChessHttpConn {
     private final String USER_AGENT = "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/71.0.3578.98 Chrome/71.0.3578.98 Safari/537.36";
 
     private final static String URL = "http://www.hidegver.nhely.hu/chess/startscreenBRHchess.txt";
-    private final static String COOKIE
-            = "_ga=GA1.2.580529225.1547313889; _gid=GA1.2.116929180.1547313889; _ga=GA1.2.580529225.1547313889; _gid=GA1.2.116929180.1547313889; JSESSIONID=node01g2py056getaf1m7p5hwdul7iw13404.node0; _gat_gtag_UA_131230489_1=1";
 
-//    public static void main(String[] args) throws Exception {
-//
-//            ChessHttpConn http = new ChessHttpConn();
-//
-//            int temp = http.sendGet();
-//            TimeUnit.MILLISECONDS.sleep(50);
 
     // HTTP GET request
     int sendGet() throws Exception {
@@ -47,6 +40,7 @@ public class ChessHttpConn {
 
         while ((inputLine = in.readLine()) != null) {
             System.out.println(inputLine);
+            TimeUnit.MILLISECONDS.sleep(200);
         }
         in.close();
 
