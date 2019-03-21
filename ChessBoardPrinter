@@ -5,6 +5,8 @@
  */
 package bh.jsc04;
 
+import java.util.List;
+
 /**
  *
  * @author lborisz
@@ -14,6 +16,15 @@ public class ChessBoardPrinter {
   public static void printABC(){
     System.out.println("    A   B   C   D   E   F   G   H");
   }
+  
+  
+  public static void printRemovedFig(int row, int num, List list){  
+        for (int i =(row-num)*4; i < list.size(); i++) {
+            if (i == ((row-num)*4)+4) break;
+            System.out.print(list.get(i));
+        }
+  }
+  
   
   public static void printBoard(){
 
@@ -27,11 +38,8 @@ public class ChessBoardPrinter {
         //\u2B1B, \u2588, \u2591
       }
       System.out.print("|       \u001B[47m");
-        for (int i =(row-1)*4; i < Chess.figuresRemoved.size(); i++) {
-            if (i == ((row-1)*4)+4) break;
-            System.out.print(Chess.figuresRemoved.get(i));
-        }
-
+      if ( row<=4) printRemovedFig(row, 1, Chess.figuresRemoved0);
+      else         printRemovedFig(row, 5, Chess.figuresRemoved1);
       System.out.println("\u001B[0m");
       System.out.println("  ---------------------------------");
     }
