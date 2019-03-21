@@ -150,4 +150,12 @@ public class Chess {
     return true;
   }
 
+    private static boolean ruleOutIdle ( int vectorY, int vectorX){
+      if ( vectorY ==0 & vectorX ==0) {     
+          System.out.println("Debug: Hiba, helyben maradna a bábu"); return true;
+      }
+
+    return false;    
+    }
+
 }
