@@ -34,9 +34,7 @@ public class Game {
         if (checkInputLine(inputLine)){
           if (Chess.move(player_flag, from_row, from_column, to_row, to_column)){
             player_flag = player_flag == 0 ? 1 : 0;
-          } else {
-              System.out.println((player_flag+1) + ". játékos lép");
-          }
+          } 
         }
       }
     } while (!exit);
@@ -76,7 +74,10 @@ if (    !((inputChars[0] >= 'a' && inputChars[0] <= 'h') &&
     return true;
   }
   
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception{
+    ChessHttpConn getScreen = new ChessHttpConn();
+    int temp = getScreen.sendGet();
+    if (temp!=200) System.out.println("Internet connection not successful");
     Chess.init();
     play();
   }
