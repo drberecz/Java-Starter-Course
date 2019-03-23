@@ -28,11 +28,14 @@ public class ChessBoardPrinter {
   
   public static void printBoard(){
 
+     // StringBuilder sbstr = new StringBuilder();
     System.out.println("  ---------------------------------      Levett Bábuk: ");
     for (int row = 1; row <= 8; row++) {
       System.out.print(row+" ");
       for (int column = 1; column <= 8; column++) {
         
+      //  sbstr.append(Chess.board[row][column]);
+          
         System.out.print(Chess.board[row][column] == ' ' ?  "| " + square(row+column) + " " :
                                      "| " + Chess.board[row][column] + " ");
         //\u2B1B, \u2588, \u2591
@@ -44,6 +47,7 @@ public class ChessBoardPrinter {
       System.out.println("  ---------------------------------");
     }
     printABC();
+    //  System.out.println(sbstr);
   }
 
   public static char square(int i) {
