@@ -127,6 +127,7 @@ static ArrayList<String> getFileList (){
         boolean answeredYes = menuYesNo("Akarsz jatekallast tolteni? (I)gen  / (N)em");
         if (answeredYes){
             ArrayList<String> list = getFileList();
+              if (list == null || list.size()<1) return false;          
             System.out.println("\nVálassz számot . . . pl. [0] ");
             while( num==-1 ){
                 
