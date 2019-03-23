@@ -6,7 +6,10 @@ koordinata geometria wikipedia
  */
 package bh.jsc04;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -14,7 +17,10 @@ import java.util.Scanner;
  */
 public class Game {
   
+   static Scanner scanner = new Scanner(System.in);
+    
   public static int player_flag = 0, // 0 white, 1 black
+                    board_dim   = 8,
                     from_row = 0, // A, B, C... (1-8)
                     to_row = 0, // A, B, C... (1-8)
                     from_column = 0, // 1 - 8
@@ -22,16 +28,21 @@ public class Game {
   
   public static void play(){
     boolean exit = false;
-    Scanner scanner = new Scanner(System.in);
+
     do {
       ChessBoardPrinter.printBoard();
       String currPlyr = (player_flag==0) ? "Világos" : "Sötét"; 
         System.out.println("Mit lépsz - " + currPlyr+ " ?: ");
       String inputLine = scanner.nextLine().trim();
+
+      if ("save".equals(inputLine)){
+          saveBoard(player_flag);
+      }
+      
       if ("exit".equals(inputLine)){
         exit = true;
       } else {
-        if (checkInputLine(inputLine)){
+        if (checkInputLine(inputLine, 5)){
           if (Chess.move(player_flag, from_row, from_column, to_row, to_column)){
             player_flag = player_flag == 0 ? 1 : 0;
           } 
@@ -40,21 +51,17 @@ public class Game {
     } while (!exit);
   }
   
-  public static boolean checkInputLine(String inputLine){
+  public static boolean checkInputLine(String inputLine, int correctLength ){
     if (null == inputLine || "".equals(inputLine)){
       System.out.println("Nem megfelelő adatbevitel.");
       return false;
     } 
-    if (inputLine.length() != 5){
+    if (inputLine.length() != correctLength ){
       System.out.println("Nem megfelelő adatbevitel.");
       return false;
     }
     char[] inputChars = inputLine.toCharArray();
-//    if ((inputChars[0] < 'a' || inputChars[0] > 'f') || 
-//        (inputChars[1] < '1' || inputChars[1] > '8') ||
-//         inputChars[2] != ' ' ||
-//        (inputChars[3] < 'a' || inputChars[3] > 'f') || 
-//        (inputChars[4] < '1' || inputChars[4] > '8')){
+
 
 if (    !((inputChars[0] >= 'a' && inputChars[0] <= 'h') && 
         (inputChars[1] >= '1' && inputChars[1] <= '8') &&
@@ -73,17 +80,167 @@ if (    !((inputChars[0] >= 'a' && inputChars[0] <= 'h') &&
     }
     return true;
   }
-  
+
+
+static ArrayList<String> getFileList (){
+    ArrayList<String> fileList = new ArrayList<>();
+    try{
+    ChessHttpConn DataConn = new ChessHttpConn();
+    ArrayList list = DataConn.sendGet("", "?q=dirlist");
+          for (int i = 0; i < list.size(); i++) {
+              String  str = (String)list.get(i);
+              System.out.println(str);
+              str = str.replaceAll("\\s+","");
+              String[] strParts = str.split(">");
+              fileList.add (strParts[1]);
+
+          }
+      }catch( Exception e){
+        System.out.println("Internet connection failed");
+      }
+    return fileList;
+}
+
+
+    static boolean menuYesNo (String message){
+        String input = "";
+        boolean validInput = false;
+        do{
+            System.out.println(message);
+            input = scanner.nextLine();
+            if (input != null){
+                input = input.toUpperCase();
+                validInput = (input.equals("I") | input.equals("N"));
+            }
+        }while (!validInput);
+        if ( input.equals("I")) return true;
+        return false;
+    }
+
+
+
+    static boolean menuLoadBoard (){
+         
+        int ptr =0;
+        int num=-1;
+ 
+        boolean answeredYes = menuYesNo("Akarsz jatekallast tolteni? (I)gen  / (N)em");
+        if (answeredYes){
+            ArrayList<String> list = getFileList();
+            System.out.println("\nVálassz számot . . . pl. [0] ");
+            while( num==-1 ){
+                
+                String input2 =scanner.next();
+                try{
+                    int tmp =Integer.parseInt(input2);
+                    if ( tmp>=0 && tmp<list.size() ) num = tmp;
+                }catch(Exception e){}
+                if ( num==-1)System.out.println("nem jo a szám");
+            }
+
+            try{
+            ChessHttpConn DataConn = new ChessHttpConn();            
+            String boardData = DataConn.sendGetFile(list.get(num), false);
+                for (int y = 1; y <=board_dim; y++) {
+                    for (int x = 1; x <= board_dim; x++) {
+                        Chess.board[y][x] = boardData.charAt(ptr++);
+                    }
+                }
+                //System.out.println(boardData);
+                player_flag = boardData.charAt(64) - '0';
+                Chess.enumerateFigures();
+            }catch( Exception e){
+                System.out.println("Nem sikerült betölteni a file-t");
+            }
+        }
+        return (ptr>0);
+    }
+
+
+static void saveBoard (int plyr){
+
+    System.out.println("Játékállás mentése.  MIN 6 - MAX 32 KARAKTER. Mi legyen a neve:");
+    String fajl;
+    boolean validInput = false;
+    do{
+        fajl = scanner.nextLine();
+        if ( fajl!=null && fajl.length()<=32 && fajl.length()>=6 ){
+            validInput = true;
+        }
+        if ( !validInput) System.out.println("HIBAS FAJLNEV, UJRA KEREM");
+    }while(!validInput);
+    fajl = fajl.replaceAll("[^-_.A-Za-z0-9]", "_");
+    System.out.println(  "EZ lett a filename: " +fajl);
+    try{
+        StringBuilder sb = new StringBuilder();
+        
+        for (int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; j++) {
+                char k = Chess.board[i][j];
+        switch (k){
+            case ' ': sb.append("%20"); break;
+            case Chess.WHITE_KING: sb.append( "\u2654" ); break;
+            case Chess.BLACK_KING :sb.append( "\u265A"); break;
+            case Chess.WHITE_QUEEN :sb.append( "\u2655"); break;
+            case Chess.BLACK_QUEEN :sb.append( "\u265B"); break;
+            case Chess.WHITE_ROOK :sb.append( "\u2656"); break;
+            case Chess.BLACK_ROOK :sb.append( "\u265C"); break;
+            case Chess.WHITE_KNIGHT :sb.append( "\u2658"); break;
+            case Chess.BLACK_KNIGHT :sb.append( "\u265E"); break;
+            case Chess.WHITE_BISHOP :sb.append( "\u2657"); break;
+            case Chess.BLACK_BISHOP :sb.append( "\u265D"); break;
+            case Chess.WHITE_PAWN :sb.append( "\u2659"); break;
+            case Chess.BLACK_PAWN :sb.append( "\u265F"); break;
+        
+            }
+            }
+        }
+        if (plyr==0) sb.append("0");
+        else sb.append("1");
+        
+        
+       String figu = "?q=writefile&fajlnev=" +fajl + "&content=" + sb.toString();
+    ChessHttpConn DataConn = new ChessHttpConn();
+    String msg = DataConn.sendGetFile(figu, true);
+        System.out.println(msg);
+        System.out.println(" JATEK: MENTVE!");
+      }catch( Exception e){
+        System.out.println("Internet connection failed");
+      }
+    
+}
+    
+    
+    
+    
+    
+    
+
   public static void main(String[] args) throws Exception{
       try{
-    ChessHttpConn getScreen = new ChessHttpConn();
-    int temp = getScreen.sendGet();
+    ChessHttpConn DataConn = new ChessHttpConn();
+         List data = DataConn.sendGet("startscreenBRHchess.txt", "?q=startscreen");
+          for (int i = 0; i < data.size(); i++) {
+              System.out.println(data.get(i));
+              TimeUnit.MILLISECONDS.sleep(100);
+          } 
       }catch( Exception e){
-        System.out.println("Internet connection not successful");
+        System.out.println("Internet connection failed");
       }
 
-    Chess.init();
+    if ( !menuLoadBoard() ) { Chess.init(); }
+    
+    
+    String plyrToStart = ( player_flag==0) ? "Vilagos" : "Sotet";
+      System.out.println("Ha ki akarsz majd lépni, írj be \"exit\" parancsot");
+      System.out.println("Ha ki akarod menteni a játékot, írj be \"save\" parancsot");
+      System.out.println( plyrToStart + " KEZD ... NYOMJ Betu +ENTER-T A FOLYTATASHOZ\n\n");
+    scanner.nextLine();
+    
+    
     play();
   }
   
 }
+
+
