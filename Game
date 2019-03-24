@@ -19,18 +19,19 @@ public class Game {
   
    static Scanner scanner = new Scanner(System.in);
     
-  public static int player_flag = 0, // 0 white, 1 black
+  static int player_flag = 0, // 0 white, 1 black
                     board_dim   = 8,
                     from_row = 0, // A, B, C... (1-8)
                     to_row = 0, // A, B, C... (1-8)
                     from_column = 0, // 1 - 8
                     to_column = 0; // 1 - 8
   
-  public static void play(){
+  static void play(){
     boolean exit = false;
 
     do {
       ChessBoardPrinter.printBoard();
+      Chess.check4Check(player_flag);
       String currPlyr = (player_flag==0) ? "Világos" : "Sötét"; 
         System.out.println("Mit lépsz - " + currPlyr+ " ?: ");
       String inputLine = scanner.nextLine().trim();
@@ -38,10 +39,10 @@ public class Game {
       if ("save".equals(inputLine)){
           saveBoard(player_flag);
       }
-      
-      if ("exit".equals(inputLine)){
+      else if ("exit".equals(inputLine)){
         exit = true;
-      } else {
+      }
+      else {
         if (checkInputLine(inputLine, 5)){
           if (Chess.move(player_flag, from_row, from_column, to_row, to_column)){
             player_flag = player_flag == 0 ? 1 : 0;
@@ -51,7 +52,7 @@ public class Game {
     } while (!exit);
   }
   
-  public static boolean checkInputLine(String inputLine, int correctLength ){
+  static boolean checkInputLine(String inputLine, int correctLength ){
     if (null == inputLine || "".equals(inputLine)){
       System.out.println("Nem megfelelő adatbevitel.");
       return false;
@@ -124,10 +125,10 @@ static ArrayList<String> getFileList (){
         int ptr =0;
         int num=-1;
  
-        boolean answeredYes = menuYesNo("Akarsz jatekallast tolteni? (I)gen  / (N)em");
+        boolean answeredYes = menuYesNo("Akarsz játekállást betölteni? (I)gen  / (N)em");
         if (answeredYes){
             ArrayList<String> list = getFileList();
-              if (list == null || list.size()<1) return false;          
+            if (list == null || list.size()<1) return false;
             System.out.println("\nVálassz számot . . . pl. [0] ");
             while( num==-1 ){
                 
@@ -160,12 +161,12 @@ static ArrayList<String> getFileList (){
 
 static void saveBoard (int plyr){
 
-    System.out.println("Játékállás mentése.  MIN 6 - MAX 32 KARAKTER. Mi legyen a neve:");
+    System.out.println("Játékállás mentése.  MIN 6 - MAX 48 KARAKTER. Mi legyen a neve:");
     String fajl;
     boolean validInput = false;
     do{
         fajl = scanner.nextLine();
-        if ( fajl!=null && fajl.length()<=32 && fajl.length()>=6 ){
+        if ( fajl!=null && fajl.length()<=48 && fajl.length()>=6 ){
             validInput = true;
         }
         if ( !validInput) System.out.println("HIBAS FAJLNEV, UJRA KEREM");
@@ -232,10 +233,10 @@ static void saveBoard (int plyr){
     if ( !menuLoadBoard() ) { Chess.init(); }
     
     
-    String plyrToStart = ( player_flag==0) ? "Vilagos" : "Sotet";
+    String plyrToStart = ( player_flag==0) ? "Világos" : "Sötét";
       System.out.println("Ha ki akarsz majd lépni, írj be \"exit\" parancsot");
       System.out.println("Ha ki akarod menteni a játékot, írj be \"save\" parancsot");
-      System.out.println( plyrToStart + " KEZD ... NYOMJ Betu +ENTER-T A FOLYTATASHOZ\n\n");
+      System.out.println( plyrToStart + " KEZD ... NYOMJ ENTER-T A FOLYTATASHOZ\n\n");
     scanner.nextLine();
     
     
