@@ -15,36 +15,39 @@ import java.util.List;
  */
 public class Chess {
 
-  public static final char WHITE_KING = '\u2654';
-  public static final char BLACK_KING = '\u265A';
-  public static final char WHITE_QUEEN = '\u2655';
-  public static final char BLACK_QUEEN = '\u265B';
-
-  public static final char WHITE_ROOK = '\u2656';
-  public static final char BLACK_ROOK = '\u265C';
-  public static final char WHITE_KNIGHT = '\u2658';
-  public static final char BLACK_KNIGHT = '\u265E';
-  public static final char WHITE_BISHOP = '\u2657';
-  public static final char BLACK_BISHOP = '\u265D';
-
-  public static final char WHITE_PAWN = '\u2659';
-  public static final char BLACK_PAWN = '\u265F';
-
-  public static char[][] board = new char[9][9];
-
-  public static final char[] WHITE_FIGURES = {WHITE_PAWN, WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN, WHITE_KING};
-  public static final char[] BLACK_FIGURES = {BLACK_PAWN, BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING};
-
-  public static char[] wfq = {WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN,};
-  public static char[] bfq = {BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN,};
-
-  public static char[] wrq = {' ', WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_KING, WHITE_QUEEN, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK,};
-  public static char[] brq = {' ', BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK,};
-
-  public static List <Character> figuresRemoved0 = new ArrayList<>();
-  public static List <Character> figuresRemoved1 = new ArrayList<>();  
+  static int[][] wbKingYX = { { 1, 4 },{ 8, 4 }};
+  static boolean showErr   = true;
   
-  public static void init() {
+  static final char WHITE_KING = '\u2654';
+  static final char BLACK_KING = '\u265A';
+  static final char WHITE_QUEEN = '\u2655';
+  static final char BLACK_QUEEN = '\u265B';
+
+  static final char WHITE_ROOK = '\u2656';
+  static final char BLACK_ROOK = '\u265C';
+  static final char WHITE_KNIGHT = '\u2658';
+  static final char BLACK_KNIGHT = '\u265E';
+  static final char WHITE_BISHOP = '\u2657';
+  static final char BLACK_BISHOP = '\u265D';
+
+  static final char WHITE_PAWN = '\u2659';
+  static final char BLACK_PAWN = '\u265F';
+
+  static char[][] board = new char[9][9];
+
+  static final char[] WHITE_FIGURES = {WHITE_PAWN, WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN, WHITE_KING};
+  static final char[] BLACK_FIGURES = {BLACK_PAWN, BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING};
+
+  static char[] wfq = {WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN,};
+  static char[] bfq = {BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN,};
+
+  static char[] wrq = {' ', WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_KING, WHITE_QUEEN, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK,};
+  static char[] brq = {' ', BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_KING, BLACK_QUEEN, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK,};
+
+  static List <Character> figuresRemoved0 = new ArrayList<>();
+  static List <Character> figuresRemoved1 = new ArrayList<>();  
+  
+  static void init() {
     
     for (int i = 0; i < 9; i++) {
         Arrays.fill (board[i], ' ');     
@@ -66,13 +69,20 @@ public class Chess {
       for (int y = 1; y <= Game.board_dim; y++) {
         for (int x = 1; x <= Game.board_dim; x++) {
             char boardPiece = board[y][x];
+            
+            if (boardPiece==WHITE_KING){
+                wbKingYX[0][0] = y; wbKingYX[0][1] = x; 
+            }
+            if (boardPiece==BLACK_KING){
+                wbKingYX[1][0] = y; wbKingYX[1][1] = x; 
+            }            
             int tmp = isValidFigure(0, boardPiece);
             if ( tmp>=0 ) ++whiteFigActual[tmp];
             tmp = isValidFigure(1, boardPiece);
             if ( tmp>=0 ) ++blackFigActual[tmp];
         }          
       }
-for ( int x: whiteFigActual){ System.out.print(".." + x);}
+//for ( int x: whiteFigActual){ System.out.print(".." + x);}
       
       for (int i = 0; i < FIGURE_NUMBERS.length; i++) {
 
@@ -91,7 +101,7 @@ for ( int x: whiteFigActual){ System.out.print(".." + x);}
   
 
 
-  public static boolean move(int player_flag, int from_row, int from_column, int to_row, int to_column) {
+  static boolean move(int player_flag, int from_row, int from_column, int to_row, int to_column) {
     char figure = board[from_row][from_column];
     char target = board[to_row][to_column];
     System.out.println("move: " + (player_flag+1) + ". játékos lépés kiértékelés");
@@ -99,7 +109,7 @@ for ( int x: whiteFigActual){ System.out.print(".." + x);}
         System.out.println("Azon a mezőn nincs saját figurád ");
       return false;
     }
-   
+    
     if (!checkRule(figure, from_row, from_column, to_row, to_column)){
       return false;
     }else if 
@@ -108,7 +118,12 @@ for ( int x: whiteFigActual){ System.out.print(".." + x);}
       return false;
     } 
         
-        
+    boolean isSafeMove = isSafeMove(player_flag, from_row, from_column, to_row, to_column);
+    if (!isSafeMove){
+        System.out.println("Oda nem léphetsz, sakkban lennél/maradnál.");
+        return false;
+    }
+    
     board[from_row][from_column] = ' ';
     if ( target!=' ' ) {
         if (player_flag==0)
@@ -123,7 +138,7 @@ for ( int x: whiteFigActual){ System.out.print(".." + x);}
     
   }
 
-  public static int isValidFigure(int player_flag, char figure) {
+  static int isValidFigure(int player_flag, char figure) {
     if (figure == ' ') {
       return -1;
     }
@@ -140,7 +155,7 @@ for ( int x: whiteFigActual){ System.out.print(".." + x);}
     return i;
   }
 
-  public static boolean checkRule(char figure, int from_row, int from_column, int to_row, int to_column) {
+  static boolean checkRule(char figure, int from_row, int from_column, int to_row, int to_column) {
 
     if (figure == WHITE_KING || figure == BLACK_KING){
       return checkKingRule(from_row, from_column, to_row, to_column);
@@ -167,7 +182,6 @@ for ( int x: whiteFigActual){ System.out.print(".." + x);}
                 checkRookRule(from_row, from_column, to_row, to_column) :
                 checkBishopRule(from_row, from_column, to_row, to_column);
                 
-        //System.out.println("Queenmove is>" + isValidQueenMove);
         return isValidQueenMove;
     }    
     
@@ -190,7 +204,7 @@ for ( int x: whiteFigActual){ System.out.print(".." + x);}
       
       // átlós lépésnél a két vektor abszolút értéke egyezik, ha nem - false
       if ( Math.abs(vectorY) != Math.abs(vectorX)){
-          System.out.println("(" +board[y1][x1]+") helytelen koordinata");
+          if(showErr) System.out.println("(" +board[y1][x1]+") helytelen koordinata");
           return false;
       }
       // ha csak 1-et lép nem kell vizsgálni, van e blokkoló bábu- ?vectorY>1
@@ -199,7 +213,7 @@ for ( int x: whiteFigActual){ System.out.print(".." + x);}
           x1+= signX;
           char piece = board[y1][x1];
           if (  piece!= ' ' & (y1!=y2 & x1!=x2) ) {
-              System.out.println("debug: Útban van egy bábu: "+ piece);
+              if(showErr) System.out.println("debug: Útban van egy bábu: "+ piece);
               return false;
           }
       }      
@@ -214,7 +228,7 @@ for ( int x: whiteFigActual){ System.out.print(".." + x);}
       if (ruleOutIdle(vectorY, vectorX)) return false;
 
       if ( vectorY!=0 & vectorX!=0 ){
-          System.out.println("(" +board[y1][x1]+") helytelen koordinata");return false;
+          if(showErr) System.out.println("(" +board[y1][x1]+") helytelen koordinata");return false;
       }
       if (Math.abs(vectorY)==1 | Math.abs(vectorX)==1) return true;
       
@@ -226,7 +240,7 @@ for ( int x: whiteFigActual){ System.out.print(".." + x);}
           x1+= signX;
           char piece = board[y1][x1];
           if (  piece!= ' ' &  (y1!=y2 | x1!=x2)) {
-              System.out.println("debug: Útban van egy bábu: "+ piece);
+              if(showErr) System.out.println("debug: Útban van egy bábu: "+ piece);
               return false;
           }
       }      
@@ -243,19 +257,19 @@ for ( int x: whiteFigActual){ System.out.print(".." + x);}
       
       if (ruleOutIdle(vectorY, 0)) return false;
       if ( y1!=2  & y1!=7 & vectorYabs > 1){
-          System.out.println("a Gyalog csak 1x léphet duplát"); return false;
+          if(showErr) System.out.println("a Gyalog csak 1x léphet duplát"); return false;
       }    
       if ( signY!=dirY | vectorYabs>2 | Math.abs(vectorX)>1) {
-          System.out.println("("+board[y1][x1]+") helytelen koordinata");
+          if(showErr) System.out.println("("+board[y1][x1]+") helytelen koordináta");
           return false;
       }
       char target = board[y2][x2];      
       if (vectorX==0 &  target!=' '){
-          System.out.println("Foglalt mező: ("+target+")");
+          if(showErr) System.out.println("Foglalt mező: ("+target+")");
           return false;
       }
       if( vectorX != 0 & target == ' '){
-          System.out.println("A Gyalog üres mezőt nem üthet");
+          if(showErr) System.out.println("A Gyalog üres mezőt nem üthet");
           return false;
       }  
       return true;
@@ -279,7 +293,7 @@ for ( int x: whiteFigActual){ System.out.print(".." + x);}
                 return true;
             }
         }
-        System.out.println("("+board[y1][x1]+") helytelen koordinata");
+        if(showErr) System.out.println("("+board[y1][x1]+") helytelen koordinata");
     return false;
     }
   
@@ -290,7 +304,7 @@ for ( int x: whiteFigActual){ System.out.print(".." + x);}
         int vectorX = x2-x1; 
         if (ruleOutIdle(vectorY, vectorX)) return false;
         if(Math.abs(vectorY)>1 | Math.abs(vectorX)>1){
-            System.out.println("("+board[y1][x1]+") helytelen koordinata");
+            if(showErr) System.out.println("("+board[y1][x1]+") helytelen koordináta");
             return false;
         }
         
@@ -299,14 +313,70 @@ for ( int x: whiteFigActual){ System.out.print(".." + x);}
   
     private static boolean ruleOutIdle ( int vectorY, int vectorX){
       if ( vectorY ==0 & vectorX ==0) {     
-          System.out.println("Debug: Hiba, helyben maradna a bábu"); return true;
+          if(showErr) System.out.println("Debug: Hiba, helyben maradna a bábu"); return true;
       }
 
     return false;    
     }
 
+    
+    static boolean check4Check ( int plyr_flag ){
+        showErr = false;
+        int opponent = (plyr_flag==0) ? 1 : 0;
+        int kingY = wbKingYX[plyr_flag][0];
+        int kingX = wbKingYX[plyr_flag][1];
+        
+      for (int y = 1; y <= Game.board_dim; y++) {
+        for (int x = 1; x <= Game.board_dim; x++) {
+            char boardPiece = board[y][x];  
+            if ( boardPiece!=' ' && isValidFigure(opponent,boardPiece)>-1 ){
+                if ( checkRule(boardPiece, y, x, kingY, kingX)){
+                    System.out.println("SAKKBAN: "+ (plyr_flag+1) +". játékos" );
+                  showErr = true;      
+                  return true;
+                }
+            }
+        
+        }
+      }
+        showErr = true;      
+        return false;
+    }
 
     
+static boolean isSafeMove ( int player_flag, int from_row, int from_column, int to_row, int to_column){
+    
+    char figure = board[from_row][from_column];
+    char target = board[to_row][to_column];
+    int kingYstored = wbKingYX[player_flag][0];
+    int kingXstored = wbKingYX[player_flag][1];
+    board[to_row][to_column] = figure;
+    board[from_row][from_column] = ' ';
+    if ( figure==WHITE_KING | figure==BLACK_KING){
+        wbKingYX[player_flag][0] = to_row;
+        wbKingYX[player_flag][1] = to_column;        
+    }
+    if (check4Check(player_flag)){
+        board[to_row][to_column] = target;
+        board[from_row][from_column] = figure;     
+        wbKingYX[player_flag][0] = kingYstored;
+        wbKingYX[player_flag][1] = kingXstored;   
+        return false;
+    }
+
+return true;    
 }
+    
+    
+}
+
+
+
+
+
+
+
+
+
 
 
