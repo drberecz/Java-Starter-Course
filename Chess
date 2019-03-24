@@ -157,17 +157,21 @@ public class Chess {
 
   static boolean checkRule(char figure, int from_row, int from_column, int to_row, int to_column) {
 
+      int vectorY = to_row-from_row;
+      int vectorX = to_column-from_column;
+      if (ruleOutIdle(vectorY, vectorX)) return false;    
+      
     if (figure == WHITE_KING || figure == BLACK_KING){
-      return checkKingRule(from_row, from_column, to_row, to_column);
+      return checkKingRule(vectorY, vectorX);
     }      
     if (figure == WHITE_PAWN){
-      return checkPawnRule( 1,from_row, from_column, to_row, to_column);
+      return checkPawnRule( 1,vectorY, vectorX, from_row, to_row, to_column);
     }
     if (figure == BLACK_PAWN){
-      return checkPawnRule( -1,from_row, from_column, to_row, to_column);
+      return checkPawnRule( -1,vectorY, vectorX, from_row, to_row, to_column);
     }
     if (figure == WHITE_KNIGHT || figure == BLACK_KNIGHT){
-      return checkKnightRule(from_row, from_column, to_row, to_column);
+      return checkKnightRule(vectorY, vectorX);
     }
     if (figure == BLACK_BISHOP || figure == WHITE_BISHOP){
       return checkBishopRule(from_row, from_column, to_row, to_column);
@@ -176,8 +180,7 @@ public class Chess {
       return checkRookRule(from_row, from_column, to_row, to_column);
     }
     if (figure == BLACK_QUEEN || figure == WHITE_QUEEN){
-        int vectorY = to_column -from_column;
-        int vectorX = to_row - from_row;
+
         boolean isValidQueenMove = ( vectorY==0 | vectorX==0 ) ?
                 checkRookRule(from_row, from_column, to_row, to_column) :
                 checkBishopRule(from_row, from_column, to_row, to_column);
@@ -199,60 +202,40 @@ public class Chess {
       int vectorX = x2-x1;      
       int signY   = (vectorY>0) ? 1:-1;     // a teszteléshez kellenek
       int signX   = (vectorX>0) ? 1:-1;     // a while ciklusban léptet majd
-      // nulla léptetés nem kerül be a while-ba, mert azt kiszűri 
-      if (ruleOutIdle(vectorY, vectorX)) return false;
       
       // átlós lépésnél a két vektor abszolút értéke egyezik, ha nem - false
       if ( Math.abs(vectorY) != Math.abs(vectorX)){
-          if(showErr) System.out.println("(" +board[y1][x1]+") helytelen koordinata");
+          if(showErr) System.out.println("helytelen koordinata");
           return false;
       }
       // ha csak 1-et lép nem kell vizsgálni, van e blokkoló bábu- ?vectorY>1
-      while ( Math.abs(vectorY)!=1 &  y1!=y2 && x1!=x2  ){
-          y1+= signY; // y1,x1 lokál változók, szimulálja a lépéseket egyesével 
-          x1+= signX;
-          char piece = board[y1][x1];
-          if (  piece!= ' ' & (y1!=y2 & x1!=x2) ) {
-              if(showErr) System.out.println("debug: Útban van egy bábu: "+ piece);
-              return false;
-          }
-      }      
-    return true;
+      if (Math.abs(vectorY) ==1) return true;
+      
+      return isRouteFree ( y1, x1, y2, x2, signY, signX);
+      
   }
 
 
   private static boolean checkRookRule(int y1, int x1, int y2, int x2) {
-       
+  
       int vectorY = y2-y1;
-      int vectorX = x2-x1;      
-      if (ruleOutIdle(vectorY, vectorX)) return false;
-
+      int vectorX = x2-x1; 
+      
       if ( vectorY!=0 & vectorX!=0 ){
-          if(showErr) System.out.println("(" +board[y1][x1]+") helytelen koordinata");return false;
+          if(showErr) System.out.println("helytelen koordinata");return false;
       }
       if (Math.abs(vectorY)==1 | Math.abs(vectorX)==1) return true;
       
       int signY = (vectorY==0) ? 0 : vectorY/Math.abs(vectorY);
       int signX = (vectorX==0) ? 0 : vectorX/Math.abs(vectorX);
-      
-      while ( y1!=y2 | x1!=x2  ){
-          y1+= signY; 
-          x1+= signX;
-          char piece = board[y1][x1];
-          if (  piece!= ' ' &  (y1!=y2 | x1!=x2)) {
-              if(showErr) System.out.println("debug: Útban van egy bábu: "+ piece);
-              return false;
-          }
-      }      
-    return true;
+           
+      return isRouteFree ( y1, x1, y2, x2, signY, signX);
   }
 
   
-  private static boolean checkPawnRule(int dirY,int y1, int x1, int y2, int x2) {
+  private static boolean checkPawnRule(int dirY,int vectorY,int vectorX, int y1, int y2, int x2) {
        
-      int vectorY = y2-y1;
-      int vectorYabs = Math.abs(vectorY);
-      int vectorX = x2-x1;     
+      int vectorYabs = Math.abs(vectorY);   
       int signY = (vectorY ==0) ? 0 : vectorY/Math.abs(vectorY);    
       
       if (ruleOutIdle(vectorY, 0)) return false;
@@ -260,7 +243,7 @@ public class Chess {
           if(showErr) System.out.println("a Gyalog csak 1x léphet duplát"); return false;
       }    
       if ( signY!=dirY | vectorYabs>2 | Math.abs(vectorX)>1) {
-          if(showErr) System.out.println("("+board[y1][x1]+") helytelen koordináta");
+          if(showErr) System.out.println("helytelen koordináta");
           return false;
       }
       char target = board[y2][x2];      
@@ -276,35 +259,30 @@ public class Chess {
   } 
 
   
-    private static boolean checkKnightRule(int y1, int x1, int y2, int x2){
+    private static boolean checkKnightRule(int vectorY,int vectorX){
         int[][] predefVectors = {
             { -1,-2 }, { -2,-1 }, { -2,1 },{ -1,2 },
             { 1,-2 }, { 2,-1 }, { 2,1 }, { 1,2 } 
         };
-        int vectorY = y2-y1;
-        int vectorX = x2-x1; 
+
         int      ptr = vectorY<0 ? 0 : predefVectors.length>>1;
         int endIndex = vectorY<0 ? predefVectors.length>>1 : predefVectors.length;
         endIndex     = vectorX<0 ? endIndex-2  : endIndex;
         
-        if (ruleOutIdle(vectorY, vectorX)) return false;
         for (; ptr < endIndex; ptr++) {
             if ( vectorY==predefVectors[ptr][0] && vectorX==predefVectors[ptr][1] ){
                 return true;
             }
         }
-        if(showErr) System.out.println("("+board[y1][x1]+") helytelen koordinata");
+        if(showErr) System.out.println("helytelen koordinata");
     return false;
     }
   
   
-    private static boolean checkKingRule(int y1, int x1, int y2, int x2){
+    private static boolean checkKingRule(int vectorY,int vectorX){
 
-        int vectorY = y2-y1;
-        int vectorX = x2-x1; 
-        if (ruleOutIdle(vectorY, vectorX)) return false;
         if(Math.abs(vectorY)>1 | Math.abs(vectorX)>1){
-            if(showErr) System.out.println("("+board[y1][x1]+") helytelen koordináta");
+            if(showErr) System.out.println( "helytelen koordináta");
             return false;
         }
         
@@ -320,7 +298,7 @@ public class Chess {
     }
 
     
-    static boolean check4Check ( int plyr_flag ){
+    static boolean check4Check ( int plyr_flag, boolean showMsg){
         showErr = false;
         int opponent = (plyr_flag==0) ? 1 : 0;
         int kingY = wbKingYX[plyr_flag][0];
@@ -331,7 +309,7 @@ public class Chess {
             char boardPiece = board[y][x];  
             if ( boardPiece!=' ' && isValidFigure(opponent,boardPiece)>-1 ){
                 if ( checkRule(boardPiece, y, x, kingY, kingX)){
-                    System.out.println("SAKKBAN: "+ (plyr_flag+1) +". játékos" );
+                  if (showMsg)System.out.println("SAKKBAN: "+ (plyr_flag+1) +". játékos" );
                   showErr = true;      
                   return true;
                 }
@@ -356,7 +334,7 @@ static boolean isSafeMove ( int player_flag, int from_row, int from_column, int 
         wbKingYX[player_flag][0] = to_row;
         wbKingYX[player_flag][1] = to_column;        
     }
-    if (check4Check(player_flag)){
+    if (check4Check(player_flag, false)){
         board[to_row][to_column] = target;
         board[from_row][from_column] = figure;     
         wbKingYX[player_flag][0] = kingYstored;
@@ -367,16 +345,21 @@ static boolean isSafeMove ( int player_flag, int from_row, int from_column, int 
 return true;    
 }
     
+
+static boolean isRouteFree (int y1, int x1, int y2, int x2, int signY, int signX){
     
+      while ( y1!=y2 | x1!=x2  ){
+          y1+= signY; 
+          x1+= signX;
+          char piece = board[y1][x1];
+          if (  piece!= ' ' &  (y1!=y2 | x1!=x2)) {
+              if(showErr) System.out.println("debug: Útban van egy bábu: "+ piece);
+              return false;
+          }
+      } 
+  return true;
 }
 
 
-
-
-
-
-
-
-
-
+}
 
