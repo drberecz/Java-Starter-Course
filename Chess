@@ -17,6 +17,8 @@ public class Chess {
 
   static int[][] wbKingYX = { { 1, 4 },{ 8, 4 }};
   static boolean showErr   = true;
+  static String  errorMsg  = "";
+  static int errPos        = 1;    
   
   static final char WHITE_KING = '\u2654';
   static final char BLACK_KING = '\u265A';
@@ -106,15 +108,19 @@ public class Chess {
     char target = board[to_row][to_column];
     System.out.println("move: " + (player_flag+1) + ". játékos lépés kiértékelés");
     if (isValidFigure(player_flag, figure) ==-1){
+                 // errorMsg = "Azon a mezőn nincs saját figurád";
         System.out.println("Azon a mezőn nincs saját figurád ");
       return false;
     }
     
     if (!checkRule(figure, from_row, from_column, to_row, to_column)){
+            if(showErr) System.out.println( "helytelen koordináta");
+                //  errorMsg = "Helytelen koordináta.";
       return false;
     }else if 
         ( isValidFigure(player_flag, target)>=0 | target==WHITE_KING | target==BLACK_KING){
         System.out.println("Ezt a bábut (" + target + ") nem ütheted");
+                  //errorMsg = "NEM ütheted";
       return false;
     } 
         
@@ -159,7 +165,9 @@ public class Chess {
 
       int vectorY = to_row-from_row;
       int vectorX = to_column-from_column;
-      if (ruleOutIdle(vectorY, vectorX)) return false;    
+      if (ruleOutIdle(vectorY, vectorX)){
+          return false;
+      }    
       
     if (figure == WHITE_KING || figure == BLACK_KING){
       return checkKingRule(vectorY, vectorX);
@@ -205,7 +213,6 @@ public class Chess {
       
       // átlós lépésnél a két vektor abszolút értéke egyezik, ha nem - false
       if ( Math.abs(vectorY) != Math.abs(vectorX)){
-          if(showErr) System.out.println("helytelen koordinata");
           return false;
       }
       // ha csak 1-et lép nem kell vizsgálni, van e blokkoló bábu- ?vectorY>1
@@ -222,7 +229,6 @@ public class Chess {
       int vectorX = x2-x1; 
       
       if ( vectorY!=0 & vectorX!=0 ){
-          if(showErr) System.out.println("helytelen koordinata");return false;
       }
       if (Math.abs(vectorY)==1 | Math.abs(vectorX)==1) return true;
       
@@ -238,12 +244,10 @@ public class Chess {
       int vectorYabs = Math.abs(vectorY);   
       int signY = (vectorY ==0) ? 0 : vectorY/Math.abs(vectorY);    
       
-      if (ruleOutIdle(vectorY, 0)) return false;
       if ( y1!=2  & y1!=7 & vectorYabs > 1){
           if(showErr) System.out.println("a Gyalog csak 1x léphet duplát"); return false;
       }    
       if ( signY!=dirY | vectorYabs>2 | Math.abs(vectorX)>1) {
-          if(showErr) System.out.println("helytelen koordináta");
           return false;
       }
       char target = board[y2][x2];      
@@ -274,7 +278,7 @@ public class Chess {
                 return true;
             }
         }
-        if(showErr) System.out.println("helytelen koordinata");
+
     return false;
     }
   
@@ -282,7 +286,6 @@ public class Chess {
     private static boolean checkKingRule(int vectorY,int vectorX){
 
         if(Math.abs(vectorY)>1 | Math.abs(vectorX)>1){
-            if(showErr) System.out.println( "helytelen koordináta");
             return false;
         }
         
@@ -361,5 +364,16 @@ static boolean isRouteFree (int y1, int x1, int y2, int x2, int signY, int signX
 }
 
 
+
 }
+
+
+
+
+
+
+
+
+
+
 
