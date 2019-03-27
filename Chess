@@ -229,6 +229,7 @@ public class Chess {
       int vectorX = x2-x1; 
       
       if ( vectorY!=0 & vectorX!=0 ){
+        return false;
       }
       if (Math.abs(vectorY)==1 | Math.abs(vectorX)==1) return true;
       
