@@ -34,6 +34,7 @@ import javax.swing.text.DefaultHighlighter;
 
 public class Game extends JFrame {
   
+    static boolean toggleRemovedFigs = false;
     static boolean doneSetup = false;
     static String prevBoard = "";
     static JFrame frame; 
@@ -67,46 +68,65 @@ public class Game extends JFrame {
   
   
   
-  static void showRemovedFigs (){
-      System.out.println("benne a removedwho ban");
-  jTextArea.setText("NANANANANAN");
-      
-      StringBuilder sb = new StringBuilder();
-    sb.append( "Levett bábuk:\n" );
+  static void showRemovedFigs ()  {
+    
+    StringBuilder sb = new StringBuilder();
+    sb.append( "<html>Levett bábuk:<br><br>" );
     Chess.figuresRemoved0.forEach((ch) -> {
         sb.append(ch);
         });
-    sb.append("\n");
+    sb.append("<br>");
     Chess.figuresRemoved1.forEach((ch) -> {
         sb.append(ch);
         });
-  
-  jTextArea.setText(sb.toString());
+     sb.append("<br>BEZARAS --- KLIKK IDE</html>");
+    doneEditing.setText(sb.toString());
+      
   }
   
   
   
-  static void harvestTextField (){
+  static String harvestTextField (boolean  writingToBoard){
       String str = jTextArea.getText();
       String[] strArr = str.split("\n");
+      StringBuilder sb = new StringBuilder();
+      
       for (int y = 1; y <=8; y++) {
-          int ptr = 1;
+              sb.append(y);
           for (int x= 1; x<=8; x++) {
-              char piece = strArr[y-1].charAt(ptr);
-              Chess.board[y][x] = (piece>=9812) ? piece : ' '; 
-              ptr+=2;
+              if (writingToBoard){
+                char piece = strArr[y-1].charAt(x);
+                Chess.board[y][x] = (piece>=9812) ? piece : ' ';
+              }
+              else{
+                char piece = Chess.board[y][x];
+                char block = ( (x+y)%2==0) ? ' ' : '\u2591';
+                if (piece == ' ') 
+                    sb.append(block);
+                else
+                    sb.append(piece);                
+              }
           }
+          sb.append("|\n");
+      }
+      if (!writingToBoard) sb.append(" ABCDEFGH\nBabu:");
+
+      for ( char piece : Chess.WHITE_FIGURES){
+          sb.append(piece);
+      }
+      for ( char piece : Chess.BLACK_FIGURES){
+          sb.append(piece);
       }
       
-      
+     return (writingToBoard)  ? "" : sb.toString();
   }
   
   
   static void editBoardInit () throws BadLocationException, InterruptedException{
 
           doneEdit = false;
-          setTextField("Pályaszerkesztő");
-          editBoard();
+          jErrorDispl.setText("Pályaszerkesztő");
+          jTextArea.setText(harvestTextField(false));
           doneEditing.setText("<html>K<br>É<br>S<br>Z<br>?<br></html>");
           do{
           System.out.println("Fut a szerkesztő . . .    Ha kész, nyomj ENTER-t");
@@ -131,11 +151,11 @@ public class Game extends JFrame {
             line = strArr[i];
             int lineLen = line.length();
 
-            if ( i<8 &&  lineLen!=18 ) hasMarks=true;
+            if ( i<8 &&  lineLen!=10 ) hasMarks=true;
             
-            if ( i<8 && lineLen == 20 && line.contains("<="))
+            if ( i<8 && lineLen == 12 && line.contains("<="))
                 line = line.substring(0, lineLen-2) + "\n";
-            else if ( i<8 &&  lineLen!=18  && !line.contains("<=")){
+            else if ( i<8 &&  lineLen!=10  && !line.contains("<=")){
                 line += "<=\n";
             }
             else
@@ -210,15 +230,7 @@ public class Game extends JFrame {
       }
       sb.append(" A B C D E F G H \n");
       
-      if (!doneEdit){
-      sb.append("Bábu:");
-      for ( char piece : Chess.WHITE_FIGURES){
-          sb.append(piece);
-      }
-      for ( char piece : Chess.BLACK_FIGURES){
-          sb.append(piece);
-      }
-      }
+
       String str = sb.toString();
 //      String[] strArr = str.split("\n");
 //      for ( String s : strArr){
@@ -245,7 +257,6 @@ public class Game extends JFrame {
       String inputLine = scanner.nextLine().trim();
 
       if ("edit".equals(inputLine)){
-          System.out.println("EDITOR STARTED");
         editBoardInit();          
       }    
       else if ("save".equals(inputLine)){
@@ -453,7 +464,7 @@ static void saveBoard (int plyr){
         
     GraphicsEnvironment.getLocalGraphicsEnvironment();
 
-    Font font = new Font("DejaVu Sans Mono", Font.PLAIN, 40);
+    Font font = new Font("monospaced", Font.PLAIN, 40);
     Font font2 = new Font("DejaVu Sans Mono", Font.PLAIN, 18);        
         jTextArea = new JTextArea(32, 30);   
         jTextArea.setFont(font);
@@ -517,7 +528,7 @@ jTextArea.addKeyListener(new KeyListener(){
                 }
                 if ( !hasMarks) {
                     doneEdit = true;
-                    harvestTextField();
+                    harvestTextField(true);
                     Chess.enumerateFigures();
                     jTextArea.setText("KÉSZ.\nVisszatérhetsz\na konzolhoz");
                 }
@@ -525,19 +536,14 @@ jTextArea.addKeyListener(new KeyListener(){
                     Chess.errorMsg = "PROBLEM";
             
                 }
-                else if ( doneSetup ){
-                    try {
+                else if ( doneSetup & !toggleRemovedFigs ){
                         showRemovedFigs();
-                        try {
-                            TimeUnit.MILLISECONDS.sleep(1000);
-                        } catch (InterruptedException ex) {
-                            Logger.getLogger(Game.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                        setTextField("");
-                    } catch (BadLocationException ex) {
-                        Logger.getLogger(Game.class.getName()).log(Level.SEVERE, null, ex);
+                        toggleRemovedFigs = true;
                     }
-                    }
+                else {
+                    doneEditing.setText("<html>|<br>|<br>|<br>|<br>|<br></html>");
+                    toggleRemovedFigs = false;
+                }
                     
                 
             }
