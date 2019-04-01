@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author mantis
  */
-public class ZGame {
+public class Game {
 
    static Scanner scanner = new Scanner(System.in);
     
@@ -170,7 +170,11 @@ static void saveBoard (int plyr){
         System.out.println("A "+(player_flag == 0 ? "világos" : "sötét")+" jön!");
         
       String inputLine = scanner.nextLine().trim();
-      if ("exit".equals(inputLine)){
+      
+      if ("save".equals(inputLine)){
+          saveBoard(player_flag);
+      }
+      else if ("exit".equals(inputLine)){
         exit = true;
       } else {
         if (checkInputLine(inputLine)){
