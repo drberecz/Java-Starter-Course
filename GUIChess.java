@@ -19,6 +19,7 @@ public class Chess {
 
   static int[][] WB_KING_ORIGINAL_YX ={ { 1, 4 },{ 8, 4 }};
   static int[][] wbKingYX = { { 1, 4 },{ 8, 4 }};
+  static int[]     numOfFigsOnBoard= { 16, 16};
   static boolean showErr   = true;
   static String  errorMsg  = "";  
   
@@ -39,8 +40,8 @@ public class Chess {
 
   static char[][] board = new char[9][9];
 
-  static final char[] WHITE_FIGURES = {WHITE_PAWN, WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN, WHITE_KING};
-  static final char[] BLACK_FIGURES = {BLACK_PAWN, BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING};
+  static final char[] WHITE_FIGURES = {WHITE_KING,WHITE_QUEEN,WHITE_ROOK,WHITE_BISHOP,WHITE_KNIGHT,WHITE_PAWN};
+  static final char[] BLACK_FIGURES = {BLACK_KING,BLACK_QUEEN,BLACK_ROOK,BLACK_BISHOP,BLACK_KNIGHT,BLACK_PAWN};
 
   static char[] wfq = {WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN,};
   static char[] bfq = {BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN,};
@@ -61,20 +62,25 @@ public class Chess {
     board[7] = bfq;
     board[8] = brq;
   }
+
   
-  
-  static void enumerateFigures (){
+  static List<int[]> enumerateFigures (int plyr_flag){
+      
+      numOfFigsOnBoard[0] = 0;
+      numOfFigsOnBoard[1] = 0;      
+      List<int[]> figsOnBoardYXch=new ArrayList<>();
   //  WHITE_FIGURES = {WHITE_PAWN, WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN, WHITE_KING};
       figuresRemoved0.clear();
       figuresRemoved1.clear();
       
-      final int[] FIGURE_NUMBERS = { 8, 2, 2, 2, 1, 1 };
+      final int[] FIGURE_NUMBERS = { 1, 1, 2, 2, 2, 8 };
       int[] whiteFigActual = new int[FIGURE_NUMBERS.length];
       int[] blackFigActual = new int[FIGURE_NUMBERS.length];
 
-      for (int y = 1; y <= Game.board_dim; y++) {
-        for (int x = 1; x <= Game.board_dim; x++) {
+      for (int y = 1; y <= Game.BOARD_DIM; y++) {
+        for (int x = 1; x <= Game.BOARD_DIM; x++) {
             char boardPiece = board[y][x];
+
             
             if (boardPiece==WHITE_KING){
                 wbKingYX[0][0] = y; wbKingYX[0][1] = x; 
@@ -83,9 +89,23 @@ public class Chess {
                 wbKingYX[1][0] = y; wbKingYX[1][1] = x; 
             }            
             int tmp = isValidFigure(0, boardPiece);
-            if ( tmp>=0 ) ++whiteFigActual[tmp];
+            if ( tmp>=0 ){ 
+                ++whiteFigActual[tmp];
+                ++numOfFigsOnBoard[0];
+
+                int[] pCoordwh = { y,x, boardPiece };
+                if (plyr_flag==0) figsOnBoardYXch.add (pCoordwh);
+                
+            }
             tmp = isValidFigure(1, boardPiece);
-            if ( tmp>=0 ) ++blackFigActual[tmp];
+            if ( tmp>=0 ){ 
+                ++blackFigActual[tmp]; 
+                ++numOfFigsOnBoard[1];
+
+                int[] pCoordbl = { y,x,boardPiece };
+                if (plyr_flag==1) figsOnBoardYXch.add (pCoordbl);
+
+            }  
         }          
       }
 //for ( int x: whiteFigActual){ System.out.print(".." + x);}
@@ -102,6 +122,7 @@ public class Chess {
           }
       }
 
+      return figsOnBoardYXch;
   }
   
   
@@ -156,6 +177,7 @@ public class Chess {
     boolean isSafeMove = isSafeMove(player_flag, from_row, from_column, to_row, to_column);
     if (!isSafeMove && castlingYX[0][0]==-1){
         System.out.println("Oda nem léphetsz, sakkban lennél/maradnál.");
+        errorMsg = "Oda nem léphetsz, sakk";
         Game.errorMarkerYX[0] = to_row;
         Game.errorMarkerYX[1] = to_column;
         return false;
@@ -227,10 +249,10 @@ public class Chess {
       return checkKingRule(vectorY, vectorX);
     }      
     if (figure == WHITE_PAWN){
-      return checkPawnRule( 1,vectorY, vectorX, from_row, to_row, to_column);
+      return checkPawnRule( 1,vectorY, vectorX, from_row, from_column, to_row, to_column);
     }
     if (figure == BLACK_PAWN){
-      return checkPawnRule( -1,vectorY, vectorX, from_row, to_row, to_column);
+      return checkPawnRule( -1,vectorY, vectorX, from_row, from_column, to_row, to_column);
     }
     if (figure == WHITE_KNIGHT || figure == BLACK_KNIGHT){
       return checkKnightRule(vectorY, vectorX);
@@ -287,7 +309,7 @@ public class Chess {
   }
 
   
-  private static boolean checkPawnRule(int dirY,int vectorY,int vectorX, int y1, int y2, int x2) {
+ static boolean checkPawnRule(int dirY,int vectorY,int vectorX, int y1,int x1, int y2, int x2) {
        
       int vectorYabs = Math.abs(vectorY);   
       int signY = (vectorY ==0) ? 0 : vectorY/Math.abs(vectorY);    
@@ -301,7 +323,12 @@ public class Chess {
       if ( signY!=dirY | vectorYabs>2 | Math.abs(vectorX)>1) {
           return false;
       }
-      char target = board[y2][x2];      
+      char target = board[y2][x2]; 
+      
+      if (vectorYabs==2 && board[y1+dirY][x1]!=' ' ){
+          System.out.println("debug - nem tud 2x lepni a paraszt / utban egy babu");
+          return false;
+      }
       if (vectorX==0 &  target!=' '){
           if(showErr) System.out.println("Foglalt mező: ("+target+")");
           return false;
@@ -314,7 +341,7 @@ public class Chess {
   } 
 
   
-    private static boolean checkKnightRule(int vectorY,int vectorX){
+    static boolean checkKnightRule(int vectorY,int vectorX){
         int[][] predefVectors = {
             { -1,-2 }, { -2,-1 }, { -2,1 },{ -1,2 },
             { 1,-2 }, { 2,-1 }, { 2,1 }, { 1,2 } 
@@ -358,8 +385,8 @@ public class Chess {
         int kingY = wbKingYX[plyr_flag][0];
         int kingX = wbKingYX[plyr_flag][1];
         
-      for (int y = 1; y <= Game.board_dim; y++) {
-        for (int x = 1; x <= Game.board_dim; x++) {
+      for (int y = 1; y <= Game.BOARD_DIM; y++) {
+        for (int x = 1; x <= Game.BOARD_DIM; x++) {
             char boardPiece = board[y][x];  
             if ( boardPiece!=' ' && isValidFigure(opponent,boardPiece)!=-1 ){
                 if ( checkRule(boardPiece, y, x, kingY, kingX)){
@@ -472,6 +499,43 @@ static int[][] castling (int plyr_flag, int y1, int x1, int y2, int x2){
 }
 
 
+static boolean isThereKingValidMoves (int plyr_flag){
+        int[][] predefVectors = {
+            { -1,-1 }, { -1,-0 }, { -1,1 },
+            { 0,-1 },{ 0,1 }, 
+            { 1,-1 }, { 1,0 }, { 1,1 } 
+        };    
+    
+        int validMoves = 0;
+        int kingY = wbKingYX[plyr_flag][0];
+        int kingX = wbKingYX[plyr_flag][1];
+        
+        for (int i = 0; i < Game.BOARD_DIM; i++) {
+            int targetY = kingY + predefVectors[i][0];
+            int targetX = kingX + predefVectors[i][1];
+            
+            if (targetY<1 | targetY>Game.BOARD_DIM |
+                targetX<1 | targetX>Game.BOARD_DIM){
+                continue;
+            }
+            
+            char target = board[targetY][targetX];
+            if ( isValidFigure(plyr_flag, target) >= 0 ) continue;
+            
+            wbKingYX[plyr_flag][0] = targetY;
+            wbKingYX[plyr_flag][1] = targetX;
+            if ( !check4Check(plyr_flag, false) ){
+                ++validMoves;
+            }
+            
+            wbKingYX[plyr_flag][0] = kingY;
+            wbKingYX[plyr_flag][1] = kingX;
+        }
+        
+        
+    System.out.println("Debug - num of valid moves: " + validMoves);
+    return (validMoves!=0);
+}
 
 
 
