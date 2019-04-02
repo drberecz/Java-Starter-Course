@@ -322,12 +322,12 @@ public class Game extends JFrame {
       String msg = (Chess.check4Check(player_flag, true) ) ? "SAKK!" : "";
       setTextField(msg);
       
-      if ( msg.equals("") && evalStaleMate(player_flag)){
-          exit = true;
-          System.out.println("PATTPATT");
-          Chess.errorMsg = "PATTHELYZET - Vége a játéknak";
-          setTextField("");
-      }
+//      if ( msg.equals("") && evalStaleMate(player_flag)){
+//          exit = true;
+//          System.out.println("PATTPATT");
+//          Chess.errorMsg = "PATTHELYZET - Vége a játéknak";
+//          setTextField("");
+//      }
       
       
       String currPlyr = (player_flag==0) ? "Világos" : "Sötét"; 
@@ -531,7 +531,8 @@ static void saveBoard (int plyr){
   
         
     GraphicsEnvironment.getLocalGraphicsEnvironment();
-
+//        Ha nem megy win10 alatt, probald ezt a font-ot:
+//        Font font = new Font("DejaVu Sans Mono", Font.PLAIN, 40);
     Font font = new Font("Monospaced", Font.PLAIN, 40);
     Font font2 = new Font("DejaVu Sans Mono", Font.PLAIN, 24);        
         jTextArea = new JTextArea(32, 30);   
