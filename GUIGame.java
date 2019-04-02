@@ -33,7 +33,9 @@ import javax.swing.text.DefaultHighlighter;
 
 
 public class Game extends JFrame {
-  
+
+
+    
     static boolean toggleRemovedFigs = false;
     static boolean doneSetup = false;
     static String prevBoard = "";
@@ -57,7 +59,7 @@ public class Game extends JFrame {
    static Scanner scanner = new Scanner(System.in);
     
   static int player_flag = 0, // 0 white, 1 black
-                    board_dim   = 8,
+                    BOARD_DIM   = 8,
                     from_row = 0, // A, B, C... (1-8)
                     to_row = 0, // A, B, C... (1-8)
                     from_column = 0, // 1 - 8
@@ -65,7 +67,67 @@ public class Game extends JFrame {
   
   //'\u2591'
  
+  static boolean evalStaleMate (int plyr_flag){
   
+      char LOWEST_FIG = (char) (Chess.WHITE_KING + plyr_flag*6);
+      char HIGHEST_FIG = (char) (Chess.WHITE_PAWN + plyr_flag*6);
+      
+      int[][] PREDEF_PAWN_VEC = { {0,-1}, {0,0}, { 0,1} };
+        int[][] PREDEF_KNIGHT_VEC = {
+            { -1,-2 }, { -2,-1 }, { -2,1 },{ -1,2 },
+            { 1,-2 }, { 2,-1 }, { 2,1 }, { 1,2 } 
+        };
+      
+      List <int[]> figsOnBoard = Chess.enumerateFigures(plyr_flag);
+      boolean isKingStuck = Chess.isThereKingValidMoves(plyr_flag);
+      int figsTotal =Chess.numOfFigsOnBoard[plyr_flag];
+      boolean areFigNumsEqual = (Chess.numOfFigsOnBoard[0] == Chess.numOfFigsOnBoard[1]);
+      if ( figsTotal==1 && isKingStuck) return true;
+      if ( figsTotal==1 && areFigNumsEqual) return true;
+      
+// checkPawnRule(int dirY,int vectorY,int vectorX, int y1,int x1, int y2, int x2)
+        for (int[] coordsYX : figsOnBoard ){
+            
+            int figIndex = Chess.isValidFigure(player_flag, (char)(coordsYX[2]) );
+            switch (figIndex) {
+                case 5:
+
+          int dirY = (plyr_flag==0) ? 1 : -1;
+          for (int[] predefX : PREDEF_PAWN_VEC){
+              int y2 = coordsYX[0] + dirY;              
+              int x2 = coordsYX[1] + predefX[1];
+              if (y2<1 | y2>8 | x2<1 | x2>8 ) continue;
+              if (Chess.checkPawnRule(dirY, dirY, predefX[1], 
+                  coordsYX[0], coordsYX[1], y2, x2)  ){
+                  return false;
+              }
+          }                    
+                    
+                    break;
+                
+                case 4:
+                    
+          for (int[] predefYX : PREDEF_KNIGHT_VEC){
+              int y2 = predefYX[0];              
+              int x2 = predefYX[1];
+              if (y2<1 | y2>8 | x2<1 | x2>8 ) continue;
+              char target = Chess.board[y2][x2];
+              if (  !(target>=LOWEST_FIG & target<=HIGHEST_FIG) ) return false;
+          }                    
+                    
+                    break;
+                    
+                default:
+                    throw new AssertionError();
+            }
+
+          
+          
+      }
+      
+      
+      return false;
+  }
   
   
   static void showRemovedFigs ()  {
@@ -96,11 +158,16 @@ public class Game extends JFrame {
           for (int x= 1; x<=8; x++) {
               if (writingToBoard){
                 char piece = strArr[y-1].charAt(x);
-                Chess.board[y][x] = (piece>=9812) ? piece : ' ';
-              }
+                if ((piece>=9812))
+                    Chess.board[y][x] = piece;
+                else if (piece >='a' & piece<='l')
+                    Chess.board[y][x] =(char) (piece- 'a' + 9812);
+                else
+                    Chess.board[y][x] =  ' ';
+                    }
               else{
                 char piece = Chess.board[y][x];
-                char block = ( (x+y)%2==0) ? ' ' : '\u2591';
+                char block = ( (x+y)%2==0) ? '_' : '\u2591';
                 if (piece == ' ') 
                     sb.append(block);
                 else
@@ -109,13 +176,15 @@ public class Game extends JFrame {
           }
           sb.append("|\n");
       }
-      if (!writingToBoard) sb.append(" ABCDEFGH\nBabu:");
+      if (!writingToBoard) sb.append(" ABCDEFGH\n");
 
-      for ( char piece : Chess.WHITE_FIGURES){
-          sb.append(piece);
+      char prefix = 'a';
+      for ( char ch = Chess.WHITE_KING; ch<Chess.WHITE_KING+6; ++ch ){
+          sb.append(prefix++).append(ch).append(" ");
       }
-      for ( char piece : Chess.BLACK_FIGURES){
-          sb.append(piece);
+          sb.append("\n");
+      for ( char ch = Chess.BLACK_KING; ch<Chess.BLACK_KING+6; ++ch ){
+          sb.append(prefix++).append(ch).append(" ");
       }
       
      return (writingToBoard)  ? "" : sb.toString();
@@ -212,8 +281,8 @@ public class Game extends JFrame {
           sb.append ((char)(y+48));
           for (int x = 1; x <= 8; x++) {
             char piece = Chess.board[y][x];
-            char block = ((x+y)%2 ==0) ? ' ' : '\u2588';
-            char filler = ((x+y)%2 ==0)? ' ' : '\u2592';
+            char block = ((x+y)%2 ==0) ? '_' : '\u2588';
+            char filler = ((x+y)%2 ==0)? '_' : '\u2592';
             if (y==errorMarkerYX[0] & x==errorMarkerYX[1]){
                 block ='X';   filler = 'X';
             }
@@ -249,12 +318,25 @@ public class Game extends JFrame {
 
     do {
       ChessBoardPrinter.printBoard();
+
       String msg = (Chess.check4Check(player_flag, true) ) ? "SAKK!" : "";
       setTextField(msg);
       
+      if ( msg.equals("") && evalStaleMate(player_flag)){
+          exit = true;
+          System.out.println("PATTPATT");
+          Chess.errorMsg = "PATTHELYZET - Vége a játéknak";
+          setTextField("");
+      }
+      
+      
       String currPlyr = (player_flag==0) ? "Világos" : "Sötét"; 
-        System.out.println("Mit lépsz - " + currPlyr+ " ?: ");
-      String inputLine = scanner.nextLine().trim();
+      
+      String inputLine = ""; 
+      if (!exit){  
+          System.out.println("Mit lépsz - " + currPlyr+ " ?: ");
+          inputLine = scanner.nextLine().trim();
+      }
 
       if ("edit".equals(inputLine)){
         editBoardInit();          
@@ -265,7 +347,7 @@ public class Game extends JFrame {
       else if ("exit".equals(inputLine)){
         exit = true;
       }
-      else {
+      else if (!exit){
         boolean validInput = checkInputLine(inputLine, 5);
         if (!validInput) setTextField("");
         if (validInput){
@@ -276,6 +358,7 @@ public class Game extends JFrame {
          
       }
     } while (!exit);
+      System.out.println("VEGE A JATEKNAK");
   }
   
   static boolean checkInputLine(String inputLine, int correctLength ){
@@ -372,8 +455,8 @@ static ArrayList<String> getFileList (){
             try{
             ChessHttpConn DataConn = new ChessHttpConn();            
             String boardData = DataConn.sendGetFile(list.get(num), false);
-                for (int y = 1; y <=board_dim; y++) {
-                    for (int x = 1; x <= board_dim; x++) {
+                for (int y = 1; y <=BOARD_DIM; y++) {
+                    for (int x = 1; x <= BOARD_DIM; x++) {
                         //Chess.board[y][x] = boardData.charAt(ptr++);
                         char piece = boardData.charAt(ptr++);
                         if (piece>32 & piece<128){
@@ -385,7 +468,7 @@ static ArrayList<String> getFileList (){
                 }
                 System.out.println(boardData);
                 player_flag = boardData.charAt(64) - '0';
-                Chess.enumerateFigures();
+                Chess.enumerateFigures(0);
             }catch( Exception e){
                 System.out.println("Nem sikerült betölteni a file-t");
             }
@@ -417,22 +500,7 @@ static void saveBoard (int plyr){
                 
                 if (k==32) sb.append("%20");
                 else sb.append ( (char)(k+'a'-9812));
-//        switch (k){
-//            case ' ': sb.append("%20"); break;
-//            case Chess.WHITE_KING: sb.append( "\u2654" ); break;
-//            case Chess.BLACK_KING :sb.append( "\u265A"); break;
-//            case Chess.WHITE_QUEEN :sb.append( "\u2655"); break;
-//            case Chess.BLACK_QUEEN :sb.append( "\u265B"); break;
-//            case Chess.WHITE_ROOK :sb.append( "\u2656"); break;
-//            case Chess.BLACK_ROOK :sb.append( "\u265C"); break;
-//            case Chess.WHITE_KNIGHT :sb.append( "\u2658"); break;
-//            case Chess.BLACK_KNIGHT :sb.append( "\u265E"); break;
-//            case Chess.WHITE_BISHOP :sb.append( "\u2657"); break;
-//            case Chess.BLACK_BISHOP :sb.append( "\u265D"); break;
-//            case Chess.WHITE_PAWN :sb.append( "\u2659"); break;
-//            case Chess.BLACK_PAWN :sb.append( "\u265F"); break;
-//        
-//            }
+
             }
         }
         if (plyr==0) sb.append("0");
@@ -464,8 +532,8 @@ static void saveBoard (int plyr){
         
     GraphicsEnvironment.getLocalGraphicsEnvironment();
 
-    Font font = new Font("monospaced", Font.PLAIN, 40);
-    Font font2 = new Font("DejaVu Sans Mono", Font.PLAIN, 18);        
+    Font font = new Font("Monospaced", Font.PLAIN, 40);
+    Font font2 = new Font("DejaVu Sans Mono", Font.PLAIN, 24);        
         jTextArea = new JTextArea(32, 30);   
         jTextArea.setFont(font);
 
@@ -529,7 +597,7 @@ jTextArea.addKeyListener(new KeyListener(){
                 if ( !hasMarks) {
                     doneEdit = true;
                     harvestTextField(true);
-                    Chess.enumerateFigures();
+                    Chess.enumerateFigures(0);
                     jTextArea.setText("KÉSZ.\nVisszatérhetsz\na konzolhoz");
                 }
                 else
@@ -551,7 +619,7 @@ jTextArea.addKeyListener(new KeyListener(){
         
         
         frame.add(p); 
-        frame.setSize(570, 530); 
+        frame.setSize(575, 585); 
   
         frame.show(); 
         //frame.setVisible(true);   
