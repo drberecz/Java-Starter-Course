@@ -17,6 +17,8 @@ import java.util.List;
  */
 public class Chess {
 
+    
+  static List <int[]> attackRoute = new ArrayList<>();
   static int[][] WB_KING_ORIGINAL_YX ={ { 1, 4 },{ 8, 4 }};
   static int[][] wbKingYX = { { 1, 4 },{ 8, 4 }};
   static int[]     numOfFigsOnBoard= { 16, 16};
@@ -64,14 +66,14 @@ public class Chess {
   }
 
   
-  static List<int[]> enumerateFigures (int plyr_flag){
+  static ArrayList<int[]> enumerateFigures (int plyr_flag){
       
       numOfFigsOnBoard[0] = 0;
       numOfFigsOnBoard[1] = 0;      
-      List<int[]> figsOnBoardYXch=new ArrayList<>();
-  //  WHITE_FIGURES = {WHITE_PAWN, WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN, WHITE_KING};
-      figuresRemoved0.clear();
-      figuresRemoved1.clear();
+      ArrayList<int[]> figsOnBoardYXch=new ArrayList<>();
+  //WHITE_FIGURES = {WHITE_KING,WHITE_QUEEN,WHITE_ROOK,WHITE_BISHOP,WHITE_KNIGHT,WHITE_PAWN};      figuresRemoved0.clear();
+    figuresRemoved0.clear();      
+    figuresRemoved1.clear();
       
       final int[] FIGURE_NUMBERS = { 1, 1, 2, 2, 2, 8 };
       int[] whiteFigActual = new int[FIGURE_NUMBERS.length];
@@ -97,8 +99,7 @@ public class Chess {
                 if (plyr_flag==0) figsOnBoardYXch.add (pCoordwh);
                 
             }
-            tmp = isValidFigure(1, boardPiece);
-            if ( tmp>=0 ){ 
+            else if ( (tmp=isValidFigure(1, boardPiece)) >=0 ){ 
                 ++blackFigActual[tmp]; 
                 ++numOfFigsOnBoard[1];
 
@@ -381,6 +382,8 @@ public class Chess {
     
     static boolean check4Check ( int plyr_flag, boolean showMsg){
         showErr = false;
+        if ( showMsg) attackRoute.clear();
+        
         int opponent = (plyr_flag==0) ? 1 : 0;
         int kingY = wbKingYX[plyr_flag][0];
         int kingX = wbKingYX[plyr_flag][1];
@@ -390,9 +393,14 @@ public class Chess {
             char boardPiece = board[y][x];  
             if ( boardPiece!=' ' && isValidFigure(opponent,boardPiece)!=-1 ){
                 if ( checkRule(boardPiece, y, x, kingY, kingX)){
-              System.out.println("CSAK sakk" +boardPiece + ".." +y + "--" +x +
+                     System.out.println("CSAK sakk" +boardPiece + ".." +y + "--" +x +
                       "king:" + kingY +".." + kingX);
-                  if (showMsg)System.out.println("SAKKBAN: "+ (plyr_flag+1) +". játékos" );
+                  if (showMsg)
+                  {
+                      System.out.println("SAKKBAN: "+ (plyr_flag+1) +". játékos" );
+                      attackRoute = calculateRoute(boardPiece, y, x, kingY, kingX);
+                  }   
+                  
                   showErr = true;      
                   return true;
                 }
@@ -428,6 +436,35 @@ static boolean isSafeMove ( int player_flag, int from_row, int from_column, int 
 return true;    
 }
     
+
+static ArrayList <int[]> calculateRoute ( char fig, int y1, int x1, int kingY, int kingX){
+    
+    ArrayList <int[]> list = new ArrayList<>();
+    
+    if  ( fig ==WHITE_KNIGHT | fig==BLACK_KNIGHT | fig==WHITE_PAWN | fig==BLACK_PAWN){
+        int[] coords = { y1, x1 };
+        list.add(coords);
+        return list;
+                }
+    
+    
+    int vectorY = kingY - y1;
+    int vectorX = kingX - x1;        
+      int signY = (vectorY==0) ? 0 : vectorY/Math.abs(vectorY);
+      int signX = (vectorX==0) ? 0 : vectorX/Math.abs(vectorX);
+        
+    
+        while ( y1!=kingY | x1!=kingX ){
+          int[] coords = { y1, x1 };
+          list.add(coords);
+          y1+= signY; 
+          x1+= signX;
+      } 
+  return list;
+}
+
+
+
 
 static boolean isRouteFree (int y1, int x1, int y2, int x2, int signY, int signX){
     
