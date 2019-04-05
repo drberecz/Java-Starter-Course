@@ -59,7 +59,7 @@ public class Game extends JFrame {
             to_column = 0; // 1 - 8
 
     //'\u2591'
-    static boolean evalStaleMate(int plyr_flag) {
+    static boolean evalStaleMate(int plyr_flag, ArrayList<int[]> figsOnBoard) {
 
         char LOWEST_FIG = (char) (Chess.WHITE_KING + plyr_flag * 6);
         char HIGHEST_FIG = (char) (Chess.WHITE_PAWN + plyr_flag * 6);
@@ -70,7 +70,6 @@ public class Game extends JFrame {
             {1, -2}, {2, -1}, {2, 1}, {1, 2}
         };
 
-        List<int[]> figsOnBoard = Chess.enumerateFigures(plyr_flag);
         boolean isKingStuck = Chess.isThereKingValidMoves(plyr_flag);
         int figsTotal = Chess.numOfFigsOnBoard[plyr_flag];
         boolean areFigNumsEqual = (Chess.numOfFigsOnBoard[0] == Chess.numOfFigsOnBoard[1]);
@@ -81,7 +80,6 @@ public class Game extends JFrame {
             return true;
         }
 
-// checkPawnRule(int dirY,int vectorY,int vectorX, int y1,int x1, int y2, int x2)
         for (int[] coordsYX : figsOnBoard) {
 
             int figIndex = Chess.isValidFigure(player_flag, (char) (coordsYX[2]));
@@ -278,8 +276,8 @@ public class Game extends JFrame {
             sb.append((char) (y + 48));
             for (int x = 1; x <= 8; x++) {
                 char piece = Chess.board[y][x];
-                char block = ((x + y) % 2 == 0) ? '_' : 'O';  //\u2588
-                char filler = ((x + y) % 2 == 0) ? '_' : '_'; //\u2592
+                char block = ((x + y) % 2 == 0) ? '\u2592' : '\u2588';  //\u2588
+                char filler = ((x + y) % 2 == 0) ? '_' : '\u2592'; //\u2592
                 if (y == errorMarkerYX[0] & x == errorMarkerYX[1]) {
                     block = 'X';
                     filler = 'X';
@@ -289,10 +287,10 @@ public class Game extends JFrame {
 
                 if (piece == ' ') {
                     sb.append(block);
-                    sb.append(block);
+                   // sb.append(block);
                 } else {
                     sb.append(piece);
-                    sb.append(filler);
+                   // sb.append(filler);
                 }
             }
             sb.append("|\n");
@@ -567,7 +565,8 @@ public class Game extends JFrame {
         GraphicsEnvironment.getLocalGraphicsEnvironment();
 //        Ha nem megy win10 alatt, probald ezt a font-ot:
 //        Font font = new Font("DejaVu Sans Mono", Font.PLAIN, 40);
-        Font font = new Font("Times roman", Font.PLAIN, 40);
+// Monospaced helyett
+        Font font = new Font("Monospaced", Font.PLAIN, 40);
         Font font2 = new Font("DejaVu Sans Mono", Font.PLAIN, 24);
         jTextArea = new JTextArea(32, 30);
         jTextArea.setFont(font);
