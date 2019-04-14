@@ -1,35 +1,49 @@
-import java.util.Scanner;
+package jsc04;
 
-public class GameOfLife {
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Scanner;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.Timer;
+
+public class GameOfLife extends JFrame{
 
     static Scanner sc = new Scanner(System.in);
 
-    static final int MATRIX_DIM = 20;
-    static boolean isEmpty;
+    static final int MATRIX_DIM = 120;
+    static boolean hasChanged;
 
+    
 // a 8 szomszed teszteléséhez 8 relatív koordináta
     static int[][] vectors = {{-1, -1}, {-1, 0}, {-1, 1},
                               {0, -1}, {0, 1},
                               {1, -1}, {1, 0}, {1, 1}
     };
 
-// ÁLLAPOTOK: -1 keret,  0 nincs,   1 van
-    static int[][] matrix = {
-        {0, 0, 1, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 1, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        
+// ÁLLAPOTOK:   0 nincs,   1 van
+// kisebb legyen, mint a matrix, és egyenlő széles/magas
+// A kezdőállás: 1 glider, 1 spaceship, 1 oscillator, 1 still life
+    static int[][] template = {
+        {0, 0, 1, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
+        {0, 0, 0, 1, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
         {0, 1, 1, 1, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 1, 1, 1, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0, 0, 1, 1, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 1, 1, 1, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 1, 1, 1, 1, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 1, 0, 0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 1, 0, 0, 1, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 1, 0, 0, 0, 1, 0, 1},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 1, 0, 1},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 1, 0, 0, 1, 0, 0, 1},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -37,58 +51,74 @@ public class GameOfLife {
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     };
 
+    static int[][] matrix = new int[MATRIX_DIM][MATRIX_DIM];    
+    static int[][] matrix2 = new int[MATRIX_DIM][MATRIX_DIM]; 
 // ez a maszk a következő állapot kiszámításához 
     static boolean[][] mask = new boolean[MATRIX_DIM][MATRIX_DIM];
 
-// a változtatások beleírása a matrix-ba és a kiíratás egy eljárásban   
+/* a változtatások beleírása a matrix-ba és a kiíratás egy eljárásban   
+ugyanitt vizsgálom, hogy valtozott-e a matrix (hasChanged)
+    hasChanged static változó, a main-ben használtam a ciklus feltételben.
+*/
     static void applyAndShow(int y, int x) {
-
-        int result = (mask[y][x]) ? 1 : 0;
-        matrix[y][x] = result;
-
-        switch (result) {
+        
+        int prev = matrix[y][x];
+        int newState = (mask[y][x]) ? 1 : 0;
+        matrix[y][x] = newState;
+        if (newState !=prev ) hasChanged = true;
+        
+       // System.out.print("\u001B[47m");             //grey background
+        switch (newState) {
             case 0:
-                System.out.print("  ");
+                matrix2[y][x] = (newState != prev)? -1 : 0;
+                //String tmp=( newState != prev)? "\u001B[34m ." : "  "; 
+                //System.out.print(tmp);
                 break;
             case 1:
-                System.out.print("()");
-                break;
+                matrix2[y][x] = (newState == prev)? 1 : 2;
+                //String tmp2=(newState == prev)? "\u001B[32m()" : "\u001B[35m()"; 
+                //System.out.print(tmp2);
+                break;                
         }
-        if (x == matrix[0].length - 1) {
-            System.out.println("");
-        }
+//        if (x == matrix[0].length - 1) {
+//            System.out.println("");
+//        }
     }
     /*
 Végigpásztázza a mátrixot (Y X) . . . 
 Apply paraméter választ:
 - ha False akkor számolja a következő játékállást
 -ha True   akkor frissíti a matrix-ot és kiíratja
+Copy paraméter: ha True, bemásolja a kis mintát(template) a matrixba
      */
-    static void scanMatrix(boolean apply) {
+    static void scanMatrix(boolean copy, boolean apply) {
 
         for (int y = 0; y < matrix.length; y++) {
             for (int x = 0; x < matrix[1].length; x++) {
 
-                if (!apply) {
-                    validateMatrix(y, x);
-                } else {
-                    applyAndShow(y, x);
-                }
+                if (copy)        copyTemplate(y, x);
+                else if (!apply) validateMatrix(y, x);
+                else             applyAndShow(y, x);    
             }
         }
     }
 
+    static void copyTemplate(int y, int x) {
+        
+        int upperLeft = MATRIX_DIM/2 - template.length/2;
+        int lowerRight= upperLeft + template.length;      
+        if (x>=upperLeft & y>=upperLeft & x<lowerRight & y<lowerRight){
+            matrix[y][x] = template[y-upperLeft][x-upperLeft];
+        }
+    }
+    
+    
     /*   int z=0 for ciklus arra van, hogy megszámlálja a szomszédokat
  a végtelenítést cirkuláris aritmetikával oldottam meg
-ugyanitt vizsgálom, hogy üres-e a matrix (isEmpty)
-    isEmpty static változó, a main-ben használtam a ciklus feltételben.
-     */
+    */
     static void validateMatrix(int y, int x) {
         int adjacent = 0;
         int current = matrix[y][x];
-        if (current > 0) {
-            isEmpty = false;
-        }
 
         for (int z = 0; z < vectors.length; z++) {
             int yVec = vectors[z][0]+y;
@@ -110,16 +140,127 @@ ugyanitt vizsgálom, hogy üres-e a matrix (isEmpty)
         }
     }
 
+        
+    
     public static void main(String[] args) {
 
-        System.out.println("Életjáték\nNYOMJ ENTER-T A TOVÁBBLÉPÉSHEZ ");
+//      SwingUtilities.invokeLater(new Runnable() {
+//         public void run() {
+//            JcompGOL.createAndShowGui();
+//         }
+//      });
+        JFrame frame = JcompGOL.createAndShowGui();
+        
+        
+        for (int i = 0; i < template.length; i++) {
+            if ( template[i].length != template.length ){
+                System.out.println("Elírtad a Template-ben a számokat.Hiba");
+                System.exit(1);
+            }
+        }
+        
+        scanMatrix(true, false);
+        System.out.println("Életjáték --- NYOMJ ENTER-T A TOVÁBBLÉPÉSHEZ ");
         int count = 0;
+        sc.nextLine();
         do {
-            System.out.println("PHASE: " + (++count));
-            isEmpty = true;
-            scanMatrix(false);
-            scanMatrix(true);
-            sc.nextLine();
-        } while (!isEmpty);
+            ++count;
+            frame.setTitle("PHASE: " + count);
+            hasChanged = false;
+            scanMatrix(false, false);
+            scanMatrix(false, true);
+            addDelay();
+        } while (hasChanged);
     }
+
+
+
+    static void addDelay() {
+
+            try {
+                Thread.sleep(JcompGOL.TIMER_DELAY);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+    }
+
+
+}
+
+
+  class JcompGOL extends JComponent {
+
+   private static final int PREF_W = 600;
+   private static final int PREF_H = 600;
+   static int  PIECE_DIM           = PREF_H/GameOfLife.MATRIX_DIM;
+   static final int TIMER_DELAY = 250;
+   public int rectX = 10;
+   public int rectY = 10;
+   public int width = 10;
+   public int height = 10;
+   
+   static JFrame createAndShowGui() {
+      JcompGOL mainPanel = new JcompGOL();
+
+      JFrame frame = new JFrame();
+      frame.setTitle("GameofLife");
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      frame.getContentPane().add(mainPanel);
+      frame.pack();
+      frame.setLocationByPlatform(true);
+      frame.setVisible(true);
+      
+      return frame;
+   }
+   
+   
+   
+   public JcompGOL() {
+      new Timer(TIMER_DELAY, new ActionListener() {
+
+         @Override
+         public void actionPerformed(ActionEvent actEvt) {
+
+               repaint();
+         }
+      }).start();
+   }
+
+
+   @Override
+   public Dimension getPreferredSize() {
+      return new Dimension(PREF_W, PREF_H);
+   }
+
+   public void paintComponent(Graphics g) {
+      super.paintComponent(g);
+      
+      g.setColor(Color.gray);
+      g.fillRect(0, 0, PREF_W, PREF_H);      
+
+
+           
+       for (int i = 0; i < GameOfLife.MATRIX_DIM; i+=1) {
+       for (int j = 0; j < GameOfLife.MATRIX_DIM; j+=1) {
+           int piece = GameOfLife.matrix2[i][j];
+           int mod = piece == -1 ? 2 : 1;
+           int hw =  piece == -1 ? 2 : 4;
+           switch(piece){
+               case (-1): g.setColor(Color.black); break;
+               case (1): g.setColor(Color.green); break;
+               case (2): g.setColor(Color.pink); break;
+               
+               
+           }
+      if (piece!=0){
+      g.fillRect(j*PIECE_DIM+mod, i*PIECE_DIM+mod, hw, hw);                
+      }
+               
+       }
+       }
+      
+     
+   }
+
+
 }
