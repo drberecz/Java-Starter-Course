@@ -28,41 +28,15 @@ public class Ant2 {
         antX = (int)(Math.random()*BOARD_DIM);
         board[antY][antX] = 1;
     }
-    
+
+
+
+
     static void moveAnt() {
+}
 
-        if (board[antY][antX] == 0) {
-            ++antDir;
-            board[antY][antX] = 1;
-        } else {
-            --antDir;
-            board[antY][antX] = 0;
-        }
 
-             
-        antDir = (antDir + 4) % 4;
 
-        switch (antDir) {
-
-            case 0:
-                antY--;
-                break;
-            case 1:
-                antX++;
-                break;
-            case 2:
-                antY++;
-                break;
-            case 3:
-                antX--;
-                break;
-
-        }
-
-        antY = (antY + BOARD_DIM) % BOARD_DIM;
-        antX = (antX + BOARD_DIM) % BOARD_DIM;
-
-    }
 
     public static void main(String[] args) throws InterruptedException {
 
