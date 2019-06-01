@@ -1,0 +1,127 @@
+package playground;
+
+import java.awt.Font;
+import java.awt.GraphicsEnvironment;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import javax.swing.JFrame;
+
+import javax.swing.JTextArea;
+
+
+public class Ant2 {
+
+    static final int BOARD_DIM = 100;
+    static int[][] board = new int[BOARD_DIM][BOARD_DIM];
+    static JTextArea display;
+    static JFrame frame;
+
+    static int antY = BOARD_DIM / 2;
+    static int antX = BOARD_DIM / 2;
+    static int antDir = 0;
+
+    
+    
+    static  void randomAnt(){
+        
+        antY = (int)(Math.random()*BOARD_DIM);        
+        antX = (int)(Math.random()*BOARD_DIM);
+        board[antY][antX] = 1;
+    }
+    
+    static void moveAnt() {
+
+        if (board[antY][antX] == 0) {
+            ++antDir;
+            board[antY][antX] = 1;
+        } else {
+            --antDir;
+            board[antY][antX] = 0;
+        }
+
+             
+        antDir = (antDir + 4) % 4;
+
+        switch (antDir) {
+
+            case 0:
+                antY--;
+                break;
+            case 1:
+                antX++;
+                break;
+            case 2:
+                antY++;
+                break;
+            case 3:
+                antX--;
+                break;
+
+        }
+
+        antY = (antY + BOARD_DIM) % BOARD_DIM;
+        antX = (antX + BOARD_DIM) % BOARD_DIM;
+
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+
+        int count = 0;
+        
+        
+        frame = new JFrame("Langston's Ant");
+
+        GraphicsEnvironment.getLocalGraphicsEnvironment();
+        Font font = new Font("Monospaced", Font.BOLD, 4);
+        display = new JTextArea();
+        display.setFont(font);
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                System.exit(0);
+            }
+        });
+
+        frame.add(display);
+        frame.setSize(BOARD_DIM * 5 + 50, BOARD_DIM * 5 + 50);
+        frame.setVisible(true);
+
+        
+        for (int i = 0; i < 10000; i++) {
+            //moveAnt();
+            randomAnt();
+            View.showBoard();
+            frame.setTitle("Langston's Ant --- PHASE: " + count++);
+           // Thread.sleep(2);
+        }
+
+ 
+    }
+}
+
+class View {
+
+    static final String WHITE_SQUARE = "\u2594\u2594";
+    static final String BLACK_SQUARE = "\u2588\u2588";
+    
+    static void showBoard() {
+
+StringBuilder sb = new StringBuilder(Ant.BOARD_DIM * Ant.BOARD_DIM);
+       
+                for (int y = 0; y < Ant2.BOARD_DIM; y++) {
+            for (int x = 0; x < Ant2.BOARD_DIM; x++) {
+                if (Ant2.board[y][x] == 0) {
+                    sb.append(WHITE_SQUARE);
+                } else {
+                    sb.append(BLACK_SQUARE);
+                }
+            }
+            sb.append('\n');
+        }
+
+        Ant2.display.setText(sb.toString());
+
+    }
+
+}
+
