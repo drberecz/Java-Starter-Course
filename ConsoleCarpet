@@ -1,0 +1,49 @@
+    public static void main(String[] args) throws InterruptedException {
+
+        
+        final int NUM_OF_FRAMES = 30;
+        final int CHARS_LIMIT = 440;        
+        int colorIndex = 0;
+        for (int i = 0; i < NUM_OF_FRAMES; i++) {
+
+            StringBuilder sb = new StringBuilder(CHARS_LIMIT);
+            sb.append("\n\n\n\n\n\n\n\n\n\n");
+            String varLengthWHSP;
+            
+            for (int j = 0; j < CHARS_LIMIT; j++) {
+
+                if (j % 40 == 0) {
+                    sb.append("\n");
+                }
+                
+                if (j%80==0){
+                    varLengthWHSP = "__"; 
+                }else
+                    varLengthWHSP = "_";
+                    
+                switch ((++colorIndex + 5) % 5) {
+
+                    case 0:
+                        sb.append("\u001B[45m").append(varLengthWHSP);
+                        break;
+                    case 1:
+                        sb.append("\u001B[41m").append(varLengthWHSP);
+                        break;
+                    case 2:
+                        sb.append("\u001B[42m").append(varLengthWHSP);
+                        break;
+                    case 3:
+                        sb.append("\u001B[43m").append(varLengthWHSP);
+                        break;
+                    case 4:
+                        sb.append("\u001B[44m").append(varLengthWHSP);
+                        break;
+                }
+
+            }
+            System.out.println(sb.toString());
+            ++colorIndex;
+            Thread.sleep(500);
+
+        }
+    }
