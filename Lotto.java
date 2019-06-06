@@ -75,7 +75,7 @@ public class Lotto {
                 if (bitSet[sheetNum][i]) {
                     System.out.print(highlighter);
                     System.out.print((i < 10) ? " " + i : i);
-                    System.out.print(ANSI_RESET);
+                    System.out.print(ANSI_RESET + " ");
                 } else {
                     System.out.print((i < 10) ? " " + i : i);
                     System.out.print(" ");
@@ -89,24 +89,28 @@ public class Lotto {
     static int inputHandler(String msg, final int LOWER_LIMIT, final int UPPER_LIMIT) {
 
         boolean isValidInput = false;
-        int inputNumber = -1;
-
+        int inputNumber= Integer.MIN_VALUE; 
+        
         while (!isValidInput) {
             System.out.println(msg);
+           
+            String inputLine = scanner.nextLine();           
+            try{
+            inputNumber = Integer.parseInt(inputLine);
+            }catch(NumberFormatException e){
+                System.out.println("error: Invalid input.\n");
+                inputNumber= Integer.MIN_VALUE; 
+            }
 
-            if (scanner.hasNextInt()) {
-                inputNumber = scanner.nextInt();
+
                 if (inputNumber >= LOWER_LIMIT && inputNumber <= UPPER_LIMIT) {
                     isValidInput = true;
-                } else {
+                } else if (inputNumber != Integer.MIN_VALUE) {
                     System.out.println("error: Entry out of range.");
                 }
-            } else {
-                String str = scanner.next();
-                System.out.println("error: Invalid input." + str + "\n\n");
 
-            }
         }
+        
         return inputNumber;
     }
 
