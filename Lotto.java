@@ -12,7 +12,7 @@ public class Lotto {
 
         
         
-        final int NUMS_SET_SIZE = inputHandler("Which GAME would you like play?\n"
+        final int NUMS_SET_SIZE = inputHandler("Which GAME would you like to play?\n"
                 + "(5) --- 5 out of 90\n"
                 + "(6) --- 6 out of 45\n"
                 + "(7) --- 7 out of 35\n"
