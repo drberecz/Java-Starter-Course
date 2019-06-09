@@ -1,0 +1,269 @@
+import java.awt.Font;
+import java.awt.GraphicsEnvironment;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.KeyListener;
+import javax.swing.JFrame;
+
+import javax.swing.JTextArea;
+
+public class HoppingDino {
+
+    final static String[] strArrDinoF1 = new String[]{
+        "      XXXXX",
+        "      X XXX",
+        "X     XX X ",
+        " X    XX   ",
+        "  XXXXX X  ",
+        "  XXXXX    ",
+        "  X  X     ",
+        "  X  XX    ",
+        "  XX       "
+
+    };
+
+    final static String[] strArrDinoF2 = new String[]{
+        "      XXXXX",
+        "      X XXX",
+        "      XX X ",
+        "XX    XX   ",
+        "  XXXXX X  ",
+        "  XXXXX    ",
+        "  X  X     ",
+        "  XX X     ",
+        "     XX    "
+
+    };
+
+    final static String[] strArrCactus = new String[]{
+        "    XX    ",
+        "   XXX X  ",
+        "    XXXX  ",
+        "  X XX    ",
+        "  XXXXX   ",
+        "    XX    ",
+        "  XXXX XX ",
+        "    XXXX  ",
+        "    XX    ",
+        "    XX    ",
+        "    XX    "
+    };
+
+    final static String[] strArrCloud = new String[]{
+        "                _                                      ",
+        "              (`  ).                   _               ",
+        "             (     ).              .:(`  )`.           ",
+        ")           _(       '`.          :(   .    )          ",
+        "        .=(`(      .   )     .--  `.  (    ) )         ",
+        "       ((    (..__.:'-'   .+(   )   ` _`  ) )          ",
+        "       `(       ) )       (   .  )     (   )  ._       ",
+        "  )      ` __.:'   )     (   (   ))     `-'.-(`  )     ",
+        ")  )  ( )       --'       `- __.'         :(      ))   ",
+        " -'  (_.'          .')                    `(    )  ))  ",
+        "                  (_  )                     ` __.:'    "
+
+    };
+
+    //\u2594
+    //\u2588
+    static final String WHITE_SQUARE = "\u2594\u2594";
+    static final String BLACK_SQUARE = "\u2588\u2588";
+
+    static final int BOARD_DIM_Y = 40;
+    static final int BOARD_DIM_X = 160;
+    static final int TARGET_FPS = 20;
+    static final int DELAY = 1000 / TARGET_FPS;
+    static int[][] board = new int[BOARD_DIM_Y][BOARD_DIM_X];
+    static JTextArea display;
+    static JFrame frame;
+    static long mainCount = 0;
+
+    static int dinoDirY = 0;
+    static double dinoPosY = BOARD_DIM_Y - strArrDinoF1.length;
+    static double dinoPosX = 30;
+    static int DINO_JUMP_HEIGHT = 16;
+    static boolean keyPressed = false;
+
+    static int[] cactusY = new int[2];
+    static int[] cactusX = new int[2];
+
+    static int[] cloudY = new int[2];
+    static int[] cloudX = new int[2];
+
+
+
+static void initGUI ()        {// EZ a blokk a GUI-t inicializalja
+            frame = new JFrame("Hopping Dino Game");
+
+            final int FONT_SIZE = 4;
+            GraphicsEnvironment.getLocalGraphicsEnvironment();
+            //Monospaced
+            Font font = new Font("Dejavu Sans Mono", Font.PLAIN, FONT_SIZE);
+            display = new JTextArea();
+            display.setFont(font);
+            frame.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    System.exit(0);
+                }
+            });
+
+            frame.add(display);
+            frame.setSize(BOARD_DIM_X * (FONT_SIZE + 1) + 100, BOARD_DIM_Y * (FONT_SIZE + 1) + 50);
+            frame.setVisible(true);
+
+            display.addKeyListener(new KeyListener() {
+
+                @Override
+                public void keyTyped(KeyEvent e) {
+                }
+
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    keyPressed = true;
+                }
+
+                @Override
+                public void keyReleased(KeyEvent e) {
+                    keyPressed = false;
+                }
+            });
+
+        }
+
+
+    
+    
+    static void updateCactusPos(int index) {
+        cactusX[index] -= 2;
+        if (cactusX[index] < -strArrCactus[0].length()) {
+            cactusX[index] = BOARD_DIM_X;
+        }
+        copyAssetIntoArray(strArrCactus, cactusY[index], cactusX[index]);
+    }
+
+    
+    
+    static void updateCloudPos(int index) {
+        cloudX[index] -= 1;
+        if (cloudX[index] < -strArrCloud[0].length()) {
+            cloudX[index] = BOARD_DIM_X;
+        }
+        copyAssetIntoArray(strArrCloud, cloudY[index], cloudX[index]);
+    }
+
+    static void updateDinoPos() {
+
+        final int JUMP_LIMIT = (int) (BOARD_DIM_Y - strArrDinoF1.length - DINO_JUMP_HEIGHT);
+        final int BASE_LIMIT = (int) (BOARD_DIM_Y - strArrDinoF1.length);
+
+        double deltaY = Math.abs(dinoPosY - JUMP_LIMIT + 2.0);
+        dinoPosY += dinoDirY * deltaY * 0.2;
+
+        if (keyPressed && dinoPosY == BASE_LIMIT) {
+            dinoDirY = -1;
+            java.awt.Toolkit.getDefaultToolkit().beep();
+        } else if (dinoPosY < JUMP_LIMIT) {
+            dinoPosY = JUMP_LIMIT;
+            dinoDirY = 1;
+        } else if (dinoPosY > BASE_LIMIT) {
+            dinoPosY = BASE_LIMIT;
+            dinoDirY = 0;
+        }
+
+        if (mainCount % 8 <= 3) {
+            copyAssetIntoArray(strArrDinoF1, (int) dinoPosY, (int) dinoPosX);
+        } else {
+            copyAssetIntoArray(strArrDinoF2, (int) dinoPosY, (int) dinoPosX);
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+
+        initGUI();
+        
+        
+        cactusY[0] = BOARD_DIM_Y - strArrCactus.length;
+        cactusX[0] = BOARD_DIM_X;
+        cactusY[1] = BOARD_DIM_Y - strArrCactus.length;
+        cactusX[1] = BOARD_DIM_X - 56;
+
+        cloudY[0] = 1;
+        cloudX[0] = BOARD_DIM_X;
+        cloudY[1] = 4;
+        cloudX[1] = BOARD_DIM_X - 68;
+
+
+
+        for (int i = 0; i < 1000; i++) {
+
+            mainCount++;
+            clearBoard();
+            updateDinoPos();
+            updateCactusPos(0);
+            updateCactusPos(1);
+            updateCloudPos(0);
+            updateCloudPos(1);
+
+            showBoard();
+
+        }
+
+    }
+
+    static void showBoard() throws InterruptedException {
+
+        long timeStamp = System.currentTimeMillis();
+        StringBuilder sb = new StringBuilder(BOARD_DIM_Y * BOARD_DIM_X + 20);
+
+        for (int y = 0; y < BOARD_DIM_Y; y++) {
+            for (int x = 0; x < BOARD_DIM_X; x++) {
+                if (board[y][x] == 0) {
+                    sb.append(WHITE_SQUARE);
+                } else {
+                    sb.append(BLACK_SQUARE);
+                }
+            }
+            sb.append('\n');
+        }
+
+        display.setText(sb.toString());
+        long timeStamp2 = System.currentTimeMillis();
+        long deltaTime = timeStamp2 - timeStamp;
+        long delay = 0;
+        if (deltaTime < DELAY) {
+            delay = DELAY - deltaTime;
+        }
+
+        frame.setTitle("Hopping Dino --- PHASE: " + mainCount);
+        Thread.sleep(delay);
+    }
+
+    static void copyAssetIntoArray(String[] asset, int assY, int assX) {
+
+        int rowPtr = 0;
+        for (int y = assY; y < BOARD_DIM_Y && rowPtr < asset.length; y++) {
+            int colPtr = (assX >= 0) ? 0 : Math.abs(assX);
+            for (int x = assX; x < BOARD_DIM_X && colPtr < asset[rowPtr].length(); x++) {
+                if (x >= 0 && asset[rowPtr].charAt(colPtr++) > 32) {
+                    board[y][x] = 1;
+                }
+
+            }
+            rowPtr++;
+        }
+
+    }
+
+    static void clearBoard() {
+
+        for (int y = 0; y < BOARD_DIM_Y; ++y) {
+            for (int x = 0; x < BOARD_DIM_X; x++) {
+                board[y][x] = 0;
+            }
+        }
+
+    }
+
+}
