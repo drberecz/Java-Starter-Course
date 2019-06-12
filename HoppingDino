@@ -218,7 +218,7 @@ static void initGUI ()        {// EZ a blokk a GUI-t inicializalja
         while(!keyPressed){
             Thread.sleep(100);
         }
-        
+          keyPressed = false;
         
         
         boolean gameover = false;
