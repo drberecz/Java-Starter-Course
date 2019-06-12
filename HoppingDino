@@ -10,7 +10,21 @@ import javax.swing.JTextArea;
 
 public class HoppingDino {
 
-    final static String[] strArrDinoF1 = new String[]{
+    
+    final static String[] ASSET_STARTSCREEN = new String[]{
+        " XXXX   XXXX   XXXX   XXXX   XXXX       XXX      X   X  XXXX  X   X  ",
+        " X   X  X   X  X     X      X          X   X     X  X   X      X X   ",
+        " XXXX   XXXX   XXXX   XXX    XXX       XXXXX     XXX    XXXX    X    ",
+        " X      X X    X         X      X      X   X     X X    X       X    ",
+        " X      X  X   X         X      X      X   X     X  X   X       X    ",
+        " X      X   X  XXXX   XXX    XXX       X   X     X   X  XXXX    X    ",
+
+
+    };
+    
+    
+    
+    final static String[] ASSET_DinoF1 = new String[]{
         "      XXXXX",
         "      X XXX",
         "X     XX X ",
@@ -23,7 +37,7 @@ public class HoppingDino {
 
     };
 
-    final static String[] strArrDinoF2 = new String[]{
+    final static String[] ASSET_DinoF2 = new String[]{
         "      XXXXX",
         "      X XXX",
         "      XX X ",
@@ -36,7 +50,7 @@ public class HoppingDino {
 
     };
 
-    final static String[] strArrCactus = new String[]{
+    final static String[] ASSET_Cactus = new String[]{
         "    XX    ",
         "   XXX X  ",
         "    XXXX  ",
@@ -50,7 +64,7 @@ public class HoppingDino {
         "    XX    "
     };
 
-    final static String[] strArrCloud = new String[]{
+    final static String[] ASSET_Cloud = new String[]{
         "                _                                      ",
         "              (`  ).                   _               ",
         "             (     ).              .:(`  )`.           ",
@@ -80,7 +94,7 @@ public class HoppingDino {
     static long mainCount = 0;
 
     static int dinoDirY = 0;
-    static double dinoPosY = BOARD_DIM_Y - strArrDinoF1.length;
+    static double dinoPosY = BOARD_DIM_Y - ASSET_DinoF1.length;
     static double dinoPosX = 30;
     static int DINO_JUMP_HEIGHT = 16;
     static boolean keyPressed = false;
@@ -137,26 +151,27 @@ static void initGUI ()        {// EZ a blokk a GUI-t inicializalja
     
     static void updateCactusPos(int index) {
         cactusX[index] -= 2;
-        if (cactusX[index] < -strArrCactus[0].length()) {
+        if (cactusX[index] < -ASSET_Cactus[0].length()) {
             cactusX[index] = BOARD_DIM_X;
         }
-        copyAssetIntoArray(strArrCactus, cactusY[index], cactusX[index]);
+        copyAssetIntoArray(ASSET_Cactus, cactusY[index], cactusX[index]);
     }
 
     
     
     static void updateCloudPos(int index) {
         cloudX[index] -= 1;
-        if (cloudX[index] < -strArrCloud[0].length()) {
+        if (cloudX[index] < -ASSET_Cloud[0].length()) {
             cloudX[index] = BOARD_DIM_X;
         }
-        copyAssetIntoArray(strArrCloud, cloudY[index], cloudX[index]);
+        copyAssetIntoArray(ASSET_Cloud, cloudY[index], cloudX[index]);
     }
 
+    
     static void updateDinoPos() {
 
-        final int JUMP_LIMIT = (int) (BOARD_DIM_Y - strArrDinoF1.length - DINO_JUMP_HEIGHT);
-        final int BASE_LIMIT = (int) (BOARD_DIM_Y - strArrDinoF1.length);
+        final int JUMP_LIMIT = (int) (BOARD_DIM_Y - ASSET_DinoF1.length - DINO_JUMP_HEIGHT);
+        final int BASE_LIMIT = (int) (BOARD_DIM_Y - ASSET_DinoF1.length);
 
         double deltaY = Math.abs(dinoPosY - JUMP_LIMIT + 2.0);
         dinoPosY += dinoDirY * deltaY * 0.2;
@@ -173,20 +188,20 @@ static void initGUI ()        {// EZ a blokk a GUI-t inicializalja
         }
 
         if (mainCount % 8 <= 3) {
-            copyAssetIntoArray(strArrDinoF1, (int) dinoPosY, (int) dinoPosX);
+            copyAssetIntoArray(ASSET_DinoF1, (int) dinoPosY, (int) dinoPosX);
         } else {
-            copyAssetIntoArray(strArrDinoF2, (int) dinoPosY, (int) dinoPosX);
+            copyAssetIntoArray(ASSET_DinoF2, (int) dinoPosY, (int) dinoPosX);
         }
     }
 
     public static void main(String[] args) throws InterruptedException {
 
         initGUI();
+        boolean[][] dinoBitMask = prepareBitmask(ASSET_DinoF1);
         
-        
-        cactusY[0] = BOARD_DIM_Y - strArrCactus.length;
+        cactusY[0] = BOARD_DIM_Y - ASSET_Cactus.length;
         cactusX[0] = BOARD_DIM_X;
-        cactusY[1] = BOARD_DIM_Y - strArrCactus.length;
+        cactusY[1] = BOARD_DIM_Y - ASSET_Cactus.length;
         cactusX[1] = BOARD_DIM_X - 56;
 
         cloudY[0] = 1;
@@ -194,22 +209,33 @@ static void initGUI ()        {// EZ a blokk a GUI-t inicializalja
         cloudY[1] = 4;
         cloudX[1] = BOARD_DIM_X - 68;
 
-
-
-        for (int i = 0; i < 1000; i++) {
+      
+        int  splashScrPosY = BOARD_DIM_Y/2 - ASSET_STARTSCREEN.length/2;
+        int  splashScrPosX = BOARD_DIM_X/2 - ASSET_STARTSCREEN[0].length()/2;
+        copyAssetIntoArray ( ASSET_STARTSCREEN, splashScrPosY, splashScrPosX);
+            showBoard();  
+        
+        while(!keyPressed){
+            Thread.sleep(100);
+        }
+        
+        
+        
+        boolean gameover = false;
+        while(!gameover) {
 
             mainCount++;
             clearBoard();
-            updateDinoPos();
             updateCactusPos(0);
             updateCactusPos(1);
             updateCloudPos(0);
             updateCloudPos(1);
-
+            gameover = checkCollision(dinoBitMask, (int)dinoPosY, (int)dinoPosX);
+            updateDinoPos();
             showBoard();
 
         }
-
+        System.out.println("GAME OVER");
     }
 
     static void showBoard() throws InterruptedException {
@@ -239,6 +265,10 @@ static void initGUI ()        {// EZ a blokk a GUI-t inicializalja
         frame.setTitle("Hopping Dino --- PHASE: " + mainCount);
         Thread.sleep(delay);
     }
+    
+    
+    
+    
 
     static void copyAssetIntoArray(String[] asset, int assY, int assX) {
 
@@ -247,6 +277,8 @@ static void initGUI ()        {// EZ a blokk a GUI-t inicializalja
             int colPtr = (assX >= 0) ? 0 : Math.abs(assX);
             for (int x = assX; x < BOARD_DIM_X && colPtr < asset[rowPtr].length(); x++) {
                 if (x >= 0 && asset[rowPtr].charAt(colPtr++) > 32) {
+//                    if (isDino && board[y][x]!=0) gameover = true;
+//                    else
                     board[y][x] = 1;
                 }
 
@@ -255,6 +287,9 @@ static void initGUI ()        {// EZ a blokk a GUI-t inicializalja
         }
 
     }
+    
+    
+    
 
     static void clearBoard() {
 
@@ -266,4 +301,44 @@ static void initGUI ()        {// EZ a blokk a GUI-t inicializalja
 
     }
 
+static boolean[][] prepareBitmask(String[] asset){
+    
+    boolean[][] bitMask = new boolean[asset.length][asset[0].length()];
+    
+            for (int y = 0; y < asset.length; y++) {
+            for (int x = 0; x < asset[0].length(); x++) {
+                if (asset[y].charAt(x) > ' ') {
+                    bitMask[y][x] = true;
+                }
+            }
+        }
+    
+    return bitMask;
 }
+    
+ 
+
+
+    static boolean checkCollision(boolean [][] asset, int assY, int assX) {
+
+        boolean foundCollision = false;
+        int rowPtr = 0;
+        for (int y = assY; y < BOARD_DIM_Y && rowPtr < asset.length; y++) {
+            int colPtr = (assX >= 0) ? 0 : Math.abs(assX);
+            for (int x = assX; x < BOARD_DIM_X && colPtr < asset[0].length; x++) {
+                if (x >= 0 && asset[rowPtr][colPtr++] ) {
+                    if (board[y][x]!=0) {
+                        foundCollision = true;
+                        break;
+                    }
+                }
+
+            }
+            rowPtr++;
+        }
+        return foundCollision;        
+    }
+
+
+}
+
