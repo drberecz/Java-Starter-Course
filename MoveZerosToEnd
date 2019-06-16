@@ -1,0 +1,61 @@
+import java.util.Arrays;
+
+
+public class MoveZerosToEnd {
+
+
+   // static     int[] arr = new int[]{ 1,0,2,0,7,6,0,-1,2};
+    static     int[] arr = new int[]{0,0,1,0,3,0,5,0,6};
+  //static     int[] arr = new int[]{ 0,0,0,0,2,1,0,0};  
+    public static void main(String[] args) {
+            
+        //moveZerosToEnd();
+        arr = moveZerosToEndNaive();
+        
+        
+        System.out.println(Arrays.toString(arr));
+    
+    
+    
+    }
+
+    private static int[] moveZerosToEndNaive() {
+        
+        int[] arrModified = new int[arr.length];
+        
+        int pointerToNewArr = 0;
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] !=0 ) arrModified[pointerToNewArr++] = arr[i];
+        }
+          
+        return arrModified;
+    }
+    
+    
+    
+    
+    private static void moveZerosToEnd() {
+
+        int currentIndex = 0;
+        int pointerToTheEnd = arr.length-1;
+        
+        
+        while (currentIndex <pointerToTheEnd){
+            
+            
+            if (arr[currentIndex] ==0){
+                for (int indexOfmove = currentIndex; indexOfmove < pointerToTheEnd; indexOfmove++) {
+                    arr[indexOfmove] = arr[indexOfmove+1];
+                }
+                arr[pointerToTheEnd] = 0;
+                pointerToTheEnd--;
+            }
+            
+            if ( arr[currentIndex]!=0 )currentIndex++;
+        }
+
+    }
+    
+}
+
+
