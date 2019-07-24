@@ -1,0 +1,129 @@
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import javax.swing.JEditorPane;
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.text.Document;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
+
+/**
+ * A complete Java class that demonstrates how to create an HTML viewer with
+ * styles, using the JEditorPane, HTMLEditorKit, StyleSheet, and JFrame.
+ *
+ * @author alvin alexander, devdaily.com.
+ *
+ */
+public class HtmlEditorKitTest {
+
+    private static JEditorPane jEditorPane;
+
+    public static void main(String[] args) {
+        new HtmlEditorKitTest();
+    }
+
+    public HtmlEditorKitTest() {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                // create jeditorpane
+                jEditorPane = new JEditorPane();
+
+                // make it read-only
+                jEditorPane.setEditable(false);
+
+                // create a scrollpane; modify its attributes as desired
+                JScrollPane scrollPane = new JScrollPane(jEditorPane);
+
+                // add an html editor kit
+                HTMLEditorKit kit = new HTMLEditorKit();
+                jEditorPane.setEditorKit(kit);
+
+                // add some styles to the html
+                StyleSheet styleSheet = kit.getStyleSheet();
+                styleSheet.addRule("body {color:#000; font-family:times; margin: 4px; }");
+                styleSheet.addRule("h1 {color: blue;}");
+                styleSheet.addRule("h2 {color: #ff0000;}");
+                styleSheet.addRule("pre {font : 10px monaco; color : black; background-color : #fafafa; }");
+
+                // create some simple html as a string
+                String htmlString = "<html>\n"
+                        + "<body>\n"
+                        + "<h1>Welcome!</h1>\n"
+                        + "<h2>This is an H2 header</h2>\n"
+                        + "<p>Valasszon szintet:</p>\n"
+                        + "<h1><a href=\"http://VALAMI\">Digitalis Kismokus</a></h1>\n"
+                        + "<h1><a href=\"http://VALAMI2\">Digitalis Troger</a></h1>\n"
+                        + "<h1><a href=\"http://VALAMI3\">Digitalis NAGYMENO</a></h1>\n"
+                        + "</body>\n";
+
+                String htmlString2
+                        = //"<html>\n"
+                        //  + "<body>\n"
+                        "<h1>TudasTar</h1>\n"
+                        + "<p><a href=\"http://fooldal\">FOOLDAL</a></p>\n"
+                        + "<p>DIGITALIS KISMOKUS</p>\n"
+                        + "Lórum ipse talán a buggyos, telő a legkevésbé légi. (7) az e osztásban négyeles gyakos anyalt zörmölt a sinenesztes értészelgélyéhez szúró nevencs gotosások és a gyakamós árság szülsőjéig pityókony. Józom a vulan hevedék keszeglő elenézeinek linatához. (2) a hönző rekes sükezes, illetve színetet a kang, a nem hönző rekes sükezes, illetve színetet öntékben circsók más ínyezés (a tivaságokban együtt: leveverő kangok) bolyóra ködi ki bécés zsaradásra a csikajhág, illetve a csévéső poénok szerint. A várság locsmarmohát, valamint azt, hogy a sükezes bolyóhoz kell paság nevencs csizást kénítnie, külön önték kémelezi meg.";
+
+                String htmlString3
+                        = //"<html>\n"
+                        //  + "<body>\n"
+                        "<h1>TudasTar</h1>\n"
+                        + "<p><a href=\"http://fooldal\">FOOLDAL</a></p>\n"
+                        + "<p>DIGITALIS Troger</p>\n"
+                        + "Ezt csak nyaságért nem lehet émbelnie, mert a sükecser palogulás nem dakolódik lomorgatas cákálást. De sávozja, mert egyre több a begető és csapós darka, tötyködnek, rodnak, és muzsolnak, hogy itt lehetnek. Tavaly a menlenségek 78 remhelye az ölést dühente meg egyelő dicsos lúgos nódénak, utána zötyögt a sedvicc, a rozsgályos lékezések meg a billonság - virrant ki a vile zöngés herentész herságából a bordé kaplin által hatott üdvösből. Ezek szerint a hajtás iránt filvajzsok 39 remhelye acst rendszeresen csippegnie. A sedvicc villalásainak 31 remhelye sedi rendszeresen videsét, míg az őrlő kélő rozsgályos lékezések frárainak csak 23 remhelye pumolja gyakran a kalását. ";
+
+                String htmlString4
+                        = //"<html>\n"
+                        //  + "<body>\n"
+                        "<h1>TudasTar</h1>\n"
+                        + "<p><a href=\"http://fooldal\">FOOLDAL</a></p>\n"
+                        + "<p>DIGITALIS NAGYMENO</p>\n"
+                        + "Tumaj ínes kedű letkelye esetén a dömnyiknek meg kell köztetniük a kedű zetesét, meg kell vizsgálnia az ínes kedű magasz és viros papáját. Evény az ínes kedű akkor lányosos borcosnak, ha annak lúdásával színes valamennyi kövényöt a dömnyik a figyező villához bírozták, és a figyező villa az ínes kedű fikádba vecskeséről latafát émetett. E latafát a figyező villa annak kélőjétől sajlan 3 poromon belül az ínes kedű részére visítnie vard. Pacskarolás a figyező villa abban a zsolásban mállhatja el az ínes kedű fikádba vecskesét, ha annak zetese nem kicsorít meg a kedű zetesének. A latafának ez zsolásban pengelnie kell, hogy az ínes kedű zetese mely buzaságon szomizálja a kedű zetesét, és fel kell bizálnia a dömnyiket a felitek csodására. Az ínes kedűnek 30 dorison belül kell a feliteket nyersítnie ; ennek fázatla után a figyező villa az ínes kedű fikádba vecskesét latafával csucsorozja. Bakókasz az ínes kedű fikádba vecskesének közlőjéről szalancos latafa ellen (annak permentéshez vecskesétől sajlan 30 függő dorison belül)";
+
+                // create a document, set it on the jeditorpane, then add the html
+                Document doc = kit.createDefaultDocument();
+                jEditorPane.setDocument(doc);
+                jEditorPane.setText(htmlString);
+
+                jEditorPane.addHyperlinkListener((HyperlinkEvent e) -> {
+                    if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                        System.out.println("WWOWOWOWOWOWOrks!");
+                        System.out.println(e.getURL());
+                        if ("http://fooldal".equals(e.getURL().toString())) {
+                            jEditorPane.setText(htmlString);
+                        }
+                        if ("http://VALAMI".equals(e.getURL().toString())) {
+                            System.out.println("mivanmmaaaa");
+                            jEditorPane.setText(htmlString2);
+                        }
+                        if ("http://VALAMI2".equals(e.getURL().toString())) {
+                            jEditorPane.setText(htmlString3);
+                        }
+                        if ("http://VALAMI3".equals(e.getURL().toString())) {
+                            jEditorPane.setText(htmlString4);
+                        }
+                    }
+                });
+
+                // now add it all to a frame
+                JFrame j = new JFrame("HtmlEditorKit Test");
+                j.getContentPane().add(scrollPane, BorderLayout.CENTER);
+
+                // make it easy to close the application
+                j.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+                // display the frame
+                j.setSize(new Dimension(800, 500));
+
+                // pack it, if you prefer
+                //j.pack();
+                // center the jframe, then make it visible
+                j.setLocationRelativeTo(null);
+                j.setVisible(true);
+            }
+        });
+    }
+}
